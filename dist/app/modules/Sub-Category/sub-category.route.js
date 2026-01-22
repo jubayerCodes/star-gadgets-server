@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SubCategoryRoutes = void 0;
+const express_1 = require("express");
+const multer_config_1 = require("../../config/multer.config");
+const validateRequest_1 = require("../../middlewares/validateRequest");
+const sub_category_validation_1 = require("./sub-category.validation");
+const sub_category_controller_1 = require("./sub-category.controller");
+exports.SubCategoryRoutes = (0, express_1.Router)();
+exports.SubCategoryRoutes.post("/", multer_config_1.multerUpload.single("file"), (0, validateRequest_1.validateRequest)(sub_category_validation_1.createSubCategoryZodSchema), sub_category_controller_1.SubCategoryControllers.createSubCategory);
+exports.SubCategoryRoutes.patch("/:id", multer_config_1.multerUpload.single("file"), (0, validateRequest_1.validateRequest)(sub_category_validation_1.updateSubCategoryZodSchema), sub_category_controller_1.SubCategoryControllers.updateSubCategory);

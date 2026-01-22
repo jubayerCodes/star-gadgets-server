@@ -34,6 +34,11 @@ const UserSchema = new Schema<IUser>(
       enum: Object.values(Role),
       default: Role.USER,
     },
+    phone: {
+      type: String,
+      required: true,
+      unique: true,
+    },
     isDeleted: {
       type: Boolean,
       default: false,

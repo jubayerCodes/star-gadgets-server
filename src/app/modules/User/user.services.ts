@@ -22,6 +22,7 @@ const createUser = async (payload: IUser) => {
     ...rest,
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { password: pass, ...newUser } = user.toObject();
 
   return newUser;

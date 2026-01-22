@@ -7,5 +7,5 @@ import { validateRequest } from "../../middlewares/validateRequest";
 
 export const UserRoutes = Router();
 
-UserRoutes.post("/register", validateRequest(createUserZodSchema), UserControllers.createUser);
+UserRoutes.post("/", validateRequest(createUserZodSchema), UserControllers.createUser);
 UserRoutes.get("/", checkAuth(Role.ADMIN, Role.SUPER_ADMIN), UserControllers.getAllUsers);
