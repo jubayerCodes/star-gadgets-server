@@ -5,14 +5,18 @@ import { User } from "./user.model";
 import { UserServices } from "./user.services";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
+import { setAuthCookie } from "../../utils/setCookie";
+import { getUserFromReq } from "../../utils/getUserFromReq";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const createUser = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  const user = await UserServices.createUser(req.body);
+  const result = await UserServices.createUser(req.body);
 
-  sendResponse<IUser>(res, {
+  setAuthCookie(res, result);
+
+  sendResponse(res, {
     statusCode: httpStatus.CREATED,
-    data: user,
+    data: result.user,
     message: "User created successfully",
     success: true,
   });
@@ -34,7 +38,21 @@ const getAllUsers = catchAsync(async (req: Request, res: Response, next: NextFun
   });
 });
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const getProfile = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const user = getUserFromReq(req);
+  const profile = await UserServices.getProfile(user.email);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    data: profile,
+    message: "User retrieved successfully",
+    success: true,
+  });
+});
+
 export const UserControllers = {
   createUser,
   getAllUsers,
+  getProfile,
 };

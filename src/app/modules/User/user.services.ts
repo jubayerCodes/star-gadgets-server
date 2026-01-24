@@ -4,6 +4,7 @@ import AppError from "../../errorHelpers/AppError";
 import httpStatus from "http-status-codes";
 import bcrypt from "bcryptjs";
 import { envVars } from "../../config/env";
+import { createUserTokens } from "../../utils/userTokens";
 
 const createUser = async (payload: Partial<IUser>) => {
   const { email, password, ...rest } = payload;
@@ -25,10 +26,16 @@ const createUser = async (payload: Partial<IUser>) => {
     ...rest,
   });
 
+  const tokens = createUserTokens(user);
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { password: pass, ...newUser } = user.toObject();
 
-  return newUser;
+  return {
+    accessToken: tokens.accessToken,
+    refreshToken: tokens.refreshToken,
+    user: newUser,
+  };
 };
 
 const getAllUsers = async () => {
@@ -40,7 +47,13 @@ const getAllUsers = async () => {
   return users;
 };
 
+const getProfile = async (email: string) => {
+  const user = await User.findOne({ email }).select("-password");
+  return user;
+};
+
 export const UserServices = {
   createUser,
   getAllUsers,
+  getProfile,
 };

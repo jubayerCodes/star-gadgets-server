@@ -14,9 +14,9 @@ const credentialsLogin = catchAsync(async (req: Request, res: Response, _next: N
 
   setAuthCookie(res, loginInfo);
 
-  sendResponse<{ accessToken: string; refreshToken: string }>(res, {
+  sendResponse(res, {
     statusCode: httpStatus.OK,
-    data: loginInfo,
+    data: loginInfo.user,
     message: "User Logged in Successfully",
     success: true,
   });

@@ -1,7 +1,7 @@
 import { Request } from "express";
 import { JwtPayload } from "jsonwebtoken";
 
-export const getUserFromReq = (req: Request) => {
+export const getUserFromReq = (req: Request): JwtPayload => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (req as any).user;
 };
