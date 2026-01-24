@@ -1,5 +1,5 @@
 import { model, Schema } from "mongoose";
-import { IUserAddress, IUser, Role } from "./user.interface";
+import { IUserAddress, IUser, Role, IAuthProvider, Provider } from "./user.interface";
 
 const AddressSchema = new Schema<IUserAddress>({
   address: {
@@ -11,6 +11,17 @@ const AddressSchema = new Schema<IUserAddress>({
     default: false,
   },
 });
+
+export const AuthProviderSchema = new Schema<IAuthProvider>(
+  {
+    provider: { type: String, enum: Object.values(Provider), required: true },
+    providerId: { type: String, required: true },
+  },
+  {
+    _id: false,
+    versionKey: false,
+  },
+);
 
 const UserSchema = new Schema<IUser>(
   {
@@ -44,6 +55,7 @@ const UserSchema = new Schema<IUser>(
       default: false,
     },
     addresses: [AddressSchema],
+    auths: [AuthProviderSchema],
   },
   {
     timestamps: true,

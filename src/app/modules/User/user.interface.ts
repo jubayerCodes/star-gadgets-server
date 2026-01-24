@@ -9,6 +9,15 @@ export interface IUserAddress {
   isDefault: boolean;
 }
 
+export enum Provider {
+  LOCAL = "LOCAL",
+  GOOGLE = "GOOGLE",
+}
+
+export interface IAuthProvider {
+  provider: Provider;
+  providerId: string;
+}
 export interface IUser {
   name: string;
   email: string;
@@ -18,4 +27,5 @@ export interface IUser {
   phone: string;
   role: Role;
   addresses?: IUserAddress[];
+  auths: IAuthProvider[];
 }
