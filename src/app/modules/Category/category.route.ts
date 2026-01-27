@@ -19,3 +19,5 @@ CategoryRoutes.patch(
   validateRequest(updateCategoryZodSchema),
   CategoryControllers.updateCategory,
 );
+
+CategoryRoutes.get("/populated", CategoryControllers.getCategoriesWithSubCategories);

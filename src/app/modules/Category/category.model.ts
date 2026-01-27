@@ -21,6 +21,10 @@ const categorySchema = new Schema<ICategory>(
       type: Boolean,
       default: false,
     },
+    nav: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true, versionKey: false },
 );

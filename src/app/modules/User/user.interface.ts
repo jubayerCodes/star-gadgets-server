@@ -24,6 +24,7 @@ export interface IUser {
   password?: string;
   avatar?: string;
   isDeleted: boolean;
+  isVerified: boolean;
   phone: string;
   role: Role;
   addresses?: IUserAddress[];

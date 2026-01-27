@@ -40,7 +40,20 @@ const updateCategory = catchAsync(async (req: Request, res: Response, next: Next
   });
 });
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const getCategoriesWithSubCategories = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const categories = await CategoryServices.getCategoriesWithSubCategories();
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Categories with sub-categories fetched successfully",
+    data: categories,
+  });
+});
+
 export const CategoryControllers = {
   createCategory,
   updateCategory,
+  getCategoriesWithSubCategories,
 };

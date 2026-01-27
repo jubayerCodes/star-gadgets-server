@@ -10,7 +10,9 @@ export const createCategoryZodSchema = z.object({
     .min(2, "Slug must be at least 2 characters long")
     .max(50, "Slug must be at most 50 characters long"),
   featured: z.boolean().default(false),
+  nav: z.boolean().default(false),
 });
+
 export const updateCategoryZodSchema = z.object({
   title: z
     .string({ error: "Title is required" })
@@ -23,4 +25,5 @@ export const updateCategoryZodSchema = z.object({
     .max(50, "Slug must be at most 50 characters long")
     .optional(),
   featured: z.boolean().optional(),
+  nav: z.boolean().optional(),
 });

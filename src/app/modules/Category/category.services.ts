@@ -40,7 +40,36 @@ const updateCategory = async (id: string, payload: Partial<ICategory>) => {
 //   return category;
 // };
 
+const getCategoriesWithSubCategories = async () => {
+  const categories = await Category.aggregate([
+    {
+      $lookup: {
+        from: "subcategories",
+        let: { categoryId: "$_id" },
+        pipeline: [
+          {
+            $match: {
+              $expr: { $eq: ["$categoryId", "$$categoryId"] },
+            },
+          },
+          {
+            $project: {
+              _id: 1,
+              title: 1,
+              slug: 1,
+            },
+          },
+        ],
+        as: "subCategories",
+      },
+    },
+  ]);
+
+  return categories;
+};
+
 export const CategoryServices = {
   createCategory,
   updateCategory,
+  getCategoriesWithSubCategories,
 };
