@@ -25,7 +25,7 @@ const credentialsLogin = (0, catchAsync_1.catchAsync)((req, res, _next) => __awa
     (0, setCookie_1.setAuthCookie)(res, loginInfo);
     (0, sendResponse_1.sendResponse)(res, {
         statusCode: http_status_codes_1.default.OK,
-        data: loginInfo,
+        data: loginInfo.user,
         message: "User Logged in Successfully",
         success: true,
     });

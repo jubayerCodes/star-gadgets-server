@@ -25,10 +25,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserServices = void 0;
 const user_model_1 = require("./user.model");
+const user_interface_1 = require("./user.interface");
 const AppError_1 = __importDefault(require("../../errorHelpers/AppError"));
 const http_status_codes_1 = __importDefault(require("http-status-codes"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const env_1 = require("../../config/env");
+const userTokens_1 = require("../../utils/userTokens");
 const createUser = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password } = payload, rest = __rest(payload, ["email", "password"]);
     const isUserExist = yield user_model_1.User.findOne({ email });
@@ -36,9 +38,15 @@ const createUser = (payload) => __awaiter(void 0, void 0, void 0, function* () {
         throw new AppError_1.default(http_status_codes_1.default === null || http_status_codes_1.default === void 0 ? void 0 : http_status_codes_1.default.BAD_REQUEST, "User Already Exist");
     }
     const hashedPassword = yield bcryptjs_1.default.hash(password, Number(env_1.envVars.BCRYPT_SALT_ROUNDS));
-    const user = yield user_model_1.User.create(Object.assign({ email, password: hashedPassword }, rest));
+    const authProvider = { provider: user_interface_1.Provider.LOCAL, providerId: email };
+    const user = yield user_model_1.User.create(Object.assign({ email, password: hashedPassword, auths: [authProvider] }, rest));
+    const tokens = (0, userTokens_1.createUserTokens)(user);
     const _a = user.toObject(), { password: pass } = _a, newUser = __rest(_a, ["password"]);
-    return newUser;
+    return {
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        user: newUser,
+    };
 });
 const getAllUsers = () => __awaiter(void 0, void 0, void 0, function* () {
     const filterOptions = {
@@ -47,7 +55,12 @@ const getAllUsers = () => __awaiter(void 0, void 0, void 0, function* () {
     const users = yield user_model_1.User.find(filterOptions).select("-password");
     return users;
 });
+const getProfile = (email) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield user_model_1.User.findOne({ email }).select("-password");
+    return user;
+});
 exports.UserServices = {
     createUser,
     getAllUsers,
+    getProfile,
 };

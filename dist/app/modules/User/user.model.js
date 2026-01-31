@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.User = void 0;
+exports.User = exports.AuthProviderSchema = void 0;
 const mongoose_1 = require("mongoose");
 const user_interface_1 = require("./user.interface");
 const AddressSchema = new mongoose_1.Schema({
@@ -12,6 +12,13 @@ const AddressSchema = new mongoose_1.Schema({
         type: Boolean,
         default: false,
     },
+});
+exports.AuthProviderSchema = new mongoose_1.Schema({
+    provider: { type: String, enum: Object.values(user_interface_1.Provider), required: true },
+    providerId: { type: String, required: true },
+}, {
+    _id: false,
+    versionKey: false,
 });
 const UserSchema = new mongoose_1.Schema({
     name: {
@@ -43,7 +50,12 @@ const UserSchema = new mongoose_1.Schema({
         type: Boolean,
         default: false,
     },
+    isVerified: {
+        type: Boolean,
+        default: true,
+    },
     addresses: [AddressSchema],
+    auths: [exports.AuthProviderSchema],
 }, {
     timestamps: true,
     versionKey: false,

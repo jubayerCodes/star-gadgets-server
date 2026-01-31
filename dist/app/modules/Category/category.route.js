@@ -9,3 +9,4 @@ const category_validation_1 = require("./category.validation");
 exports.CategoryRoutes = (0, express_1.Router)();
 exports.CategoryRoutes.post("/", multer_config_1.multerUpload.single("file"), (0, validateRequest_1.validateRequest)(category_validation_1.createCategoryZodSchema), category_controller_1.CategoryControllers.createCategory);
 exports.CategoryRoutes.patch("/:id", multer_config_1.multerUpload.single("file"), (0, validateRequest_1.validateRequest)(category_validation_1.updateCategoryZodSchema), category_controller_1.CategoryControllers.updateCategory);
+exports.CategoryRoutes.get("/populated", category_controller_1.CategoryControllers.getCategoriesWithSubCategories);

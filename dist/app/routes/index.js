@@ -6,6 +6,7 @@ const auth_routes_1 = require("../modules/Auth/auth.routes");
 const user_routes_1 = require("../modules/User/user.routes");
 const category_route_1 = require("../modules/Category/category.route");
 const sub_category_route_1 = require("../modules/Sub-Category/sub-category.route");
+const config_routes_1 = require("../modules/Configuration/config.routes");
 exports.router = (0, express_1.Router)();
 const moduleRoutes = [
     {
@@ -23,6 +24,10 @@ const moduleRoutes = [
     {
         path: "/sub-categories",
         route: sub_category_route_1.SubCategoryRoutes,
+    },
+    {
+        path: "/config",
+        route: config_routes_1.ConfigRoutes,
     },
 ];
 moduleRoutes.forEach((route) => {

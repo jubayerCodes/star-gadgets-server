@@ -32,7 +32,34 @@ const updateCategory = (id, payload) => __awaiter(void 0, void 0, void 0, functi
     const category = yield category_model_1.Category.findByIdAndUpdate(id, payload, { new: true });
     return category;
 });
+const getCategoriesWithSubCategories = () => __awaiter(void 0, void 0, void 0, function* () {
+    const categories = yield category_model_1.Category.aggregate([
+        {
+            $lookup: {
+                from: "subcategories",
+                let: { categoryId: "$_id" },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: { $eq: ["$categoryId", "$$categoryId"] },
+                        },
+                    },
+                    {
+                        $project: {
+                            _id: 1,
+                            title: 1,
+                            slug: 1,
+                        },
+                    },
+                ],
+                as: "subCategories",
+            },
+        },
+    ]);
+    return categories;
+});
 exports.CategoryServices = {
     createCategory,
     updateCategory,
+    getCategoriesWithSubCategories,
 };
