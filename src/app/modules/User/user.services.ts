@@ -28,8 +28,9 @@ const createUser = async (payload: Partial<IUser>) => {
 
   const tokens = createUserTokens(user);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { password: pass, ...newUser } = user.toObject();
+  const newUser = user.toObject();
+
+  delete newUser.password;
 
   return {
     accessToken: tokens.accessToken,

@@ -41,7 +41,8 @@ const createUser = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const authProvider = { provider: user_interface_1.Provider.LOCAL, providerId: email };
     const user = yield user_model_1.User.create(Object.assign({ email, password: hashedPassword, auths: [authProvider] }, rest));
     const tokens = (0, userTokens_1.createUserTokens)(user);
-    const _a = user.toObject(), { password: pass } = _a, newUser = __rest(_a, ["password"]);
+    const newUser = user.toObject();
+    delete newUser.password;
     return {
         accessToken: tokens.accessToken,
         refreshToken: tokens.refreshToken,
