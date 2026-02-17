@@ -17,7 +17,7 @@ const category_model_1 = require("./category.model");
 const AppError_1 = __importDefault(require("../../errorHelpers/AppError"));
 const http_status_codes_1 = __importDefault(require("http-status-codes"));
 const createCategory = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const isCategoryExist = yield category_model_1.Category.findOne({ slug: payload.slug });
+    const isCategoryExist = yield category_model_1.Category.findOne({ title: payload.title });
     if (isCategoryExist) {
         throw new AppError_1.default(http_status_codes_1.default.BAD_REQUEST, "Category already exists");
     }

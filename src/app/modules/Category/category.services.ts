@@ -4,7 +4,7 @@ import AppError from "../../errorHelpers/AppError";
 import httpStatus from "http-status-codes";
 
 const createCategory = async (payload: ICategory) => {
-  const isCategoryExist = await Category.findOne({ slug: payload.slug });
+  const isCategoryExist = await Category.findOne({ title: payload.title });
 
   if (isCategoryExist) {
     throw new AppError(httpStatus.BAD_REQUEST, "Category already exists");

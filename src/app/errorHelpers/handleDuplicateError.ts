@@ -2,16 +2,14 @@
 import { TErrorSources, TGenericErrorResponse } from "../interfaces/error.interface";
 
 const handleDuplicateError = (err: any): TGenericErrorResponse => {
-  // Extract value within double quotes using regex
-  const match = err.message.match(/"([^"]*)"/);
-
-  // The extracted value will be in the first capturing group
-  const extractedMessage = match && match[1];
+  // Extract the field/property name from keyValue object
+  // e.g. keyValue: { email: 'test@example.com' }
+  const propertyName = err.keyValue ? Object.keys(err.keyValue)[0] : "Field";
 
   const errorSources: TErrorSources = [
     {
-      path: "",
-      message: `${extractedMessage} is already exists`,
+      path: propertyName,
+      message: `"${propertyName}" is already exists`,
     },
   ];
 
@@ -19,7 +17,7 @@ const handleDuplicateError = (err: any): TGenericErrorResponse => {
 
   return {
     statusCode,
-    message: `${extractedMessage} is already exists`,
+    message: `"${propertyName}" is already exists`,
     errorSources,
   };
 };

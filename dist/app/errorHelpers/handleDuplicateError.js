@@ -1,18 +1,17 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const handleDuplicateError = (err) => {
-    const match = err.message.match(/"([^"]*)"/);
-    const extractedMessage = match && match[1];
+    const propertyName = err.keyValue ? Object.keys(err.keyValue)[0] : "Field";
     const errorSources = [
         {
-            path: "",
-            message: `${extractedMessage} is already exists`,
+            path: propertyName,
+            message: `"${propertyName}" is already exists`,
         },
     ];
     const statusCode = 400;
     return {
         statusCode,
-        message: `${extractedMessage} is already exists`,
+        message: `"${propertyName}" is already exists`,
         errorSources,
     };
 };
