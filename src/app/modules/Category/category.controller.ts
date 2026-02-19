@@ -52,8 +52,39 @@ const getCategoriesWithSubCategories = catchAsync(async (req: Request, res: Resp
   });
 });
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const deleteCategory = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const id = req.params.id as string;
+
+  await CategoryServices.deleteCategory(id);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Category deleted successfully",
+    data: null,
+  });
+});
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const getCategoriesList = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const categories = await CategoryServices.getCategoriesList();
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Categories fetched successfully",
+    data: categories,
+    meta: {
+      total: categories.length,
+    },
+  });
+});
+
 export const CategoryControllers = {
   createCategory,
   updateCategory,
   getCategoriesWithSubCategories,
+  deleteCategory,
+  getCategoriesList,
 };

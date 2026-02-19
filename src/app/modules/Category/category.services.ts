@@ -2,6 +2,7 @@ import { ICategory } from "./category.interface";
 import { Category } from "./category.model";
 import AppError from "../../errorHelpers/AppError";
 import httpStatus from "http-status-codes";
+import { SubCategory } from "../Sub-Category/sub-category.model";
 
 const createCategory = async (payload: ICategory) => {
   const isCategoryExist = await Category.findOne({ title: payload.title });
@@ -27,18 +28,23 @@ const updateCategory = async (id: string, payload: Partial<ICategory>) => {
   return category;
 };
 
-// TODO: Handle Sub Category First to Delete category
-// const deleteCategory = async (id: string) => {
-//   const isCategoryExist = await Category.findById(id);
+const deleteCategory = async (id: string) => {
+  const isCategoryExist = await Category.findById(id);
 
-//   if (!isCategoryExist) {
-//     throw new AppError(httpStatus.BAD_REQUEST, "Category not found");
-//   }
+  if (!isCategoryExist) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Category not found");
+  }
 
-//   const category = await Category.findByIdAndDelete(id);
+  const isSubCategoryExist = await SubCategory.findOne({ categoryId: id });
 
-//   return category;
-// };
+  if (isSubCategoryExist) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Sub category already exists");
+  }
+
+  await Category.findByIdAndDelete(id);
+
+  return null;
+};
 
 const getCategoriesWithSubCategories = async () => {
   const categories = await Category.aggregate([
@@ -68,8 +74,16 @@ const getCategoriesWithSubCategories = async () => {
   return categories;
 };
 
+const getCategoriesList = async () => {
+  const categories = await Category.find().select("title slug").sort({ title: 1 });
+
+  return categories;
+};
+
 export const CategoryServices = {
   createCategory,
   updateCategory,
+  deleteCategory,
   getCategoriesWithSubCategories,
+  getCategoriesList,
 };

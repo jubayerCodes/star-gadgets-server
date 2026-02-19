@@ -22,8 +22,8 @@ CategoryRoutes.patch(
   CategoryControllers.updateCategory,
 );
 
-CategoryRoutes.get(
-  "/admin",
-  checkAuth(Role.ADMIN),
-  CategoryControllers.getCategoriesWithSubCategories,
-);
+CategoryRoutes.get("/admin", checkAuth(Role.ADMIN), CategoryControllers.getCategoriesWithSubCategories);
+
+CategoryRoutes.delete("/:id", checkAuth(Role.ADMIN), CategoryControllers.deleteCategory);
+
+CategoryRoutes.get("/list", CategoryControllers.getCategoriesList);

@@ -27,7 +27,14 @@ const updateSubCategory = async (id: string, payload: Partial<ISubCategory>) => 
   return subCategory;
 };
 
+const getSubCategoriesAdmin = async () => {
+  const subCategories = await SubCategory.find().populate("categoryId");
+
+  return subCategories;
+};
+
 export const SubCategoryServices = {
   createSubCategory,
   updateSubCategory,
+  getSubCategoriesAdmin,
 };
