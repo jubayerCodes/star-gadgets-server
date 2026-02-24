@@ -39,7 +39,17 @@ const updateSubCategory = (0, catchAsync_1.catchAsync)((req, res, next) => __awa
         data: subCategory,
     });
 }));
+const getSubCategoriesAdmin = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const subCategories = yield sub_category_services_1.SubCategoryServices.getSubCategoriesAdmin();
+    (0, sendResponse_1.sendResponse)(res, {
+        success: true,
+        message: "Sub-Categories retrieved successfully",
+        statusCode: http_status_codes_1.default.OK,
+        data: subCategories,
+    });
+}));
 exports.SubCategoryControllers = {
     createSubCategory,
     updateSubCategory,
+    getSubCategoriesAdmin,
 };

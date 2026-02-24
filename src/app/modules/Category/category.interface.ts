@@ -11,6 +11,10 @@ export interface ICategory {
   updatedAt?: Date;
 }
 
+export interface ICategoryAdmin extends ICategory {
+  subCategoriesCount: number;
+}
+
 export interface ICategoryWithSubCategories extends ICategory {
   subCategories: Pick<ISubCategory, "_id" | "title" | "slug">[];
 }

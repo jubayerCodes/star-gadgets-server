@@ -11,4 +11,6 @@ const user_interface_1 = require("../User/user.interface");
 exports.CategoryRoutes = (0, express_1.Router)();
 exports.CategoryRoutes.post("/", multer_config_1.multerUpload.single("file"), (0, validateRequest_1.validateRequest)(category_validation_1.createCategoryZodSchema), category_controller_1.CategoryControllers.createCategory);
 exports.CategoryRoutes.patch("/:id", multer_config_1.multerUpload.single("file"), (0, validateRequest_1.validateRequest)(category_validation_1.updateCategoryZodSchema), category_controller_1.CategoryControllers.updateCategory);
-exports.CategoryRoutes.get("/admin", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN), category_controller_1.CategoryControllers.getCategoriesWithSubCategories);
+exports.CategoryRoutes.get("/admin", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN), category_controller_1.CategoryControllers.getCategoriesAdmin);
+exports.CategoryRoutes.delete("/:id", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN), category_controller_1.CategoryControllers.deleteCategory);
+exports.CategoryRoutes.get("/list", category_controller_1.CategoryControllers.getCategoriesList);

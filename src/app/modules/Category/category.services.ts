@@ -3,6 +3,8 @@ import { Category } from "./category.model";
 import AppError from "../../errorHelpers/AppError";
 import httpStatus from "http-status-codes";
 import { SubCategory } from "../Sub-Category/sub-category.model";
+import { extractSearchQuery } from "../../utils/extractSearchQuery";
+import { getSearchQuery } from "../../utils/getSearchQuery";
 
 const createCategory = async (payload: ICategory) => {
   const isCategoryExist = await Category.findOne({ title: payload.title });
@@ -38,12 +40,37 @@ const deleteCategory = async (id: string) => {
   const isSubCategoryExist = await SubCategory.findOne({ categoryId: id });
 
   if (isSubCategoryExist) {
-    throw new AppError(httpStatus.BAD_REQUEST, "Sub category already exists");
+    throw new AppError(httpStatus.BAD_REQUEST, "Sub category exists under this category");
   }
 
   await Category.findByIdAndDelete(id);
 
   return null;
+};
+
+const getCategoriesAdmin = async () => {
+  const categories = await Category.aggregate([
+    {
+      $lookup: {
+        from: "subcategories",
+        localField: "_id",
+        foreignField: "categoryId",
+        as: "subCategories",
+      },
+    },
+    {
+      $addFields: {
+        subCategoriesCount: { $size: "$subCategories" },
+      },
+    },
+    {
+      $project: {
+        subCategories: 0,
+      },
+    },
+  ]);
+
+  return categories;
 };
 
 const getCategoriesWithSubCategories = async () => {
@@ -74,8 +101,12 @@ const getCategoriesWithSubCategories = async () => {
   return categories;
 };
 
-const getCategoriesList = async () => {
-  const categories = await Category.find().select("title slug").sort({ title: 1 });
+const getCategoriesList = async (query: Record<string, string>) => {
+  const { limit, skip, search } = extractSearchQuery(query);
+
+  const searchQuery = getSearchQuery(search, ["title", "slug"]);
+
+  const categories = await Category.find(searchQuery).select("title slug").sort({ title: 1 }).skip(skip).limit(limit);
 
   return categories;
 };
@@ -86,4 +117,5 @@ export const CategoryServices = {
   deleteCategory,
   getCategoriesWithSubCategories,
   getCategoriesList,
+  getCategoriesAdmin,
 };

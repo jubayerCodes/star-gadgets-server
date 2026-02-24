@@ -22,7 +22,7 @@ CategoryRoutes.patch(
   CategoryControllers.updateCategory,
 );
 
-CategoryRoutes.get("/admin", checkAuth(Role.ADMIN), CategoryControllers.getCategoriesWithSubCategories);
+CategoryRoutes.get("/admin", checkAuth(Role.ADMIN), CategoryControllers.getCategoriesAdmin);
 
 CategoryRoutes.delete("/:id", checkAuth(Role.ADMIN), CategoryControllers.deleteCategory);
 

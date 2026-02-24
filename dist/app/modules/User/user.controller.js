@@ -20,6 +20,7 @@ const catchAsync_1 = require("../../utils/catchAsync");
 const sendResponse_1 = require("../../utils/sendResponse");
 const setCookie_1 = require("../../utils/setCookie");
 const getUserFromReq_1 = require("../../utils/getUserFromReq");
+const extractSearchQuery_1 = require("../../utils/extractSearchQuery");
 const createUser = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield user_services_1.UserServices.createUser(req.body);
     (0, setCookie_1.setAuthCookie)(res, result);
@@ -33,6 +34,7 @@ const createUser = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(vo
 const getAllUsers = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const users = yield user_services_1.UserServices.getAllUsers();
     const totalUsers = yield user_model_1.User.countDocuments();
+    const { page, skip, limit } = (0, extractSearchQuery_1.extractSearchQuery)(req.query);
     (0, sendResponse_1.sendResponse)(res, {
         statusCode: http_status_codes_1.default.OK,
         data: users,
@@ -40,6 +42,9 @@ const getAllUsers = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(v
         success: true,
         meta: {
             total: totalUsers,
+            page,
+            limit,
+            skip,
         },
     });
 }));

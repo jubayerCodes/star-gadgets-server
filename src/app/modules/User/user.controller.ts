@@ -7,6 +7,7 @@ import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { setAuthCookie } from "../../utils/setCookie";
 import { getUserFromReq } from "../../utils/getUserFromReq";
+import { extractSearchQuery } from "../../utils/extractSearchQuery";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const createUser = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
@@ -27,6 +28,8 @@ const getAllUsers = catchAsync(async (req: Request, res: Response, next: NextFun
   const users = await UserServices.getAllUsers();
   const totalUsers = await User.countDocuments();
 
+  const { page, skip, limit } = extractSearchQuery(req.query as Record<string, string>);
+
   sendResponse<IUser[]>(res, {
     statusCode: httpStatus.OK,
     data: users,
@@ -34,6 +37,9 @@ const getAllUsers = catchAsync(async (req: Request, res: Response, next: NextFun
     success: true,
     meta: {
       total: totalUsers,
+      page,
+      limit,
+      skip,
     },
   });
 });

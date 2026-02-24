@@ -32,7 +32,12 @@ const updateSubCategory = (id, payload) => __awaiter(void 0, void 0, void 0, fun
     const subCategory = yield sub_category_model_1.SubCategory.findByIdAndUpdate(id, payload, { new: true });
     return subCategory;
 });
+const getSubCategoriesAdmin = () => __awaiter(void 0, void 0, void 0, function* () {
+    const subCategories = yield sub_category_model_1.SubCategory.find().populate("categoryId");
+    return subCategories;
+});
 exports.SubCategoryServices = {
     createSubCategory,
     updateSubCategory,
+    getSubCategoriesAdmin,
 };

@@ -4,6 +4,9 @@ import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status-codes";
 import { ICategory } from "./category.interface";
 import { CategoryServices } from "./category.services";
+import { Category } from "./category.model";
+import { extractSearchQuery } from "../../utils/extractSearchQuery";
+import { getSearchQuery } from "../../utils/getSearchQuery";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const createCategory = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
@@ -41,13 +44,25 @@ const updateCategory = catchAsync(async (req: Request, res: Response, next: Next
 });
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
+const getCategoriesAdmin = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const categories = await CategoryServices.getCategoriesAdmin();
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Categories fetched successfully",
+    data: categories,
+  });
+});
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getCategoriesWithSubCategories = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const categories = await CategoryServices.getCategoriesWithSubCategories();
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Categories with sub-categories fetched successfully",
+    message: "Categories fetched successfully",
     data: categories,
   });
 });
@@ -68,7 +83,15 @@ const deleteCategory = catchAsync(async (req: Request, res: Response, next: Next
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getCategoriesList = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  const categories = await CategoryServices.getCategoriesList();
+  const query = req.query as Record<string, string>;
+
+  const categories = await CategoryServices.getCategoriesList(query);
+
+  const { page, skip, limit, search } = extractSearchQuery(query);
+
+  const searchQuery = getSearchQuery(search, ["title", "slug"]);
+
+  const total = await Category.countDocuments(searchQuery);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -76,7 +99,10 @@ const getCategoriesList = catchAsync(async (req: Request, res: Response, next: N
     message: "Categories fetched successfully",
     data: categories,
     meta: {
-      total: categories.length,
+      page,
+      limit,
+      skip,
+      total,
     },
   });
 });
@@ -87,4 +113,5 @@ export const CategoryControllers = {
   getCategoriesWithSubCategories,
   deleteCategory,
   getCategoriesList,
+  getCategoriesAdmin,
 };

@@ -17,6 +17,9 @@ const catchAsync_1 = require("../../utils/catchAsync");
 const sendResponse_1 = require("../../utils/sendResponse");
 const http_status_codes_1 = __importDefault(require("http-status-codes"));
 const category_services_1 = require("./category.services");
+const category_model_1 = require("./category.model");
+const extractSearchQuery_1 = require("../../utils/extractSearchQuery");
+const getSearchQuery_1 = require("../../utils/getSearchQuery");
 const createCategory = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const payload = Object.assign(Object.assign({}, req.body), { image: (_a = req.file) === null || _a === void 0 ? void 0 : _a.path });
@@ -40,17 +43,58 @@ const updateCategory = (0, catchAsync_1.catchAsync)((req, res, next) => __awaite
         data: category,
     });
 }));
+const getCategoriesAdmin = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const categories = yield category_services_1.CategoryServices.getCategoriesAdmin();
+    (0, sendResponse_1.sendResponse)(res, {
+        statusCode: http_status_codes_1.default.OK,
+        success: true,
+        message: "Categories fetched successfully",
+        data: categories,
+    });
+}));
 const getCategoriesWithSubCategories = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const categories = yield category_services_1.CategoryServices.getCategoriesWithSubCategories();
     (0, sendResponse_1.sendResponse)(res, {
         statusCode: http_status_codes_1.default.OK,
         success: true,
-        message: "Categories with sub-categories fetched successfully",
+        message: "Categories fetched successfully",
         data: categories,
+    });
+}));
+const deleteCategory = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const id = req.params.id;
+    yield category_services_1.CategoryServices.deleteCategory(id);
+    (0, sendResponse_1.sendResponse)(res, {
+        statusCode: http_status_codes_1.default.OK,
+        success: true,
+        message: "Category deleted successfully",
+        data: null,
+    });
+}));
+const getCategoriesList = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const query = req.query;
+    const categories = yield category_services_1.CategoryServices.getCategoriesList(query);
+    const { page, skip, limit, search } = (0, extractSearchQuery_1.extractSearchQuery)(query);
+    const searchQuery = (0, getSearchQuery_1.getSearchQuery)(search, ["title", "slug"]);
+    const total = yield category_model_1.Category.countDocuments(searchQuery);
+    (0, sendResponse_1.sendResponse)(res, {
+        statusCode: http_status_codes_1.default.OK,
+        success: true,
+        message: "Categories fetched successfully",
+        data: categories,
+        meta: {
+            page,
+            limit,
+            skip,
+            total,
+        },
     });
 }));
 exports.CategoryControllers = {
     createCategory,
     updateCategory,
     getCategoriesWithSubCategories,
+    deleteCategory,
+    getCategoriesList,
+    getCategoriesAdmin,
 };
