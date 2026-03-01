@@ -10,6 +10,7 @@ export const CategoryRoutes = Router();
 
 CategoryRoutes.post(
   "/",
+  checkAuth(Role.ADMIN),
   multerUpload.single("file"),
   validateRequest(createCategoryZodSchema),
   CategoryControllers.createCategory,

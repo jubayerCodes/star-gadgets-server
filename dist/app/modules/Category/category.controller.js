@@ -44,12 +44,13 @@ const updateCategory = (0, catchAsync_1.catchAsync)((req, res, next) => __awaite
     });
 }));
 const getCategoriesAdmin = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const categories = yield category_services_1.CategoryServices.getCategoriesAdmin();
+    const { categories, meta } = yield category_services_1.CategoryServices.getCategoriesAdmin(req.query);
     (0, sendResponse_1.sendResponse)(res, {
         statusCode: http_status_codes_1.default.OK,
         success: true,
         message: "Categories fetched successfully",
         data: categories,
+        meta,
     });
 }));
 const getCategoriesWithSubCategories = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {

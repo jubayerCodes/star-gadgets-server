@@ -45,13 +45,14 @@ const updateCategory = catchAsync(async (req: Request, res: Response, next: Next
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getCategoriesAdmin = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  const categories = await CategoryServices.getCategoriesAdmin();
+  const { categories, meta } = await CategoryServices.getCategoriesAdmin(req.query as Record<string, string>);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
     message: "Categories fetched successfully",
     data: categories,
+    meta,
   });
 });
 

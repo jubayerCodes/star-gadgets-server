@@ -10,6 +10,7 @@ export const SubCategoryRoutes = Router();
 
 SubCategoryRoutes.post(
   "/",
+  checkAuth(Role.ADMIN),
   multerUpload.single("file"),
   validateRequest(createSubCategoryZodSchema),
   SubCategoryControllers.createSubCategory,

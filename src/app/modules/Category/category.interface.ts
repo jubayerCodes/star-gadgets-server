@@ -6,7 +6,6 @@ export interface ICategory {
   slug: string;
   image: string;
   featured: boolean;
-  nav: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }

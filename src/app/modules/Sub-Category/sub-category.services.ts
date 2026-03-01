@@ -2,6 +2,8 @@ import { SubCategory } from "./sub-category.model";
 import httpStatus from "http-status-codes";
 import { ISubCategory } from "./sub-category.interface";
 import AppError from "../../errorHelpers/AppError";
+import { IMeta } from "../../utils/sendResponse";
+import { extractSearchQuery } from "../../utils/extractSearchQuery";
 
 const createSubCategory = async (payload: ISubCategory) => {
   const isSubCategoryExist = await SubCategory.findOne({ slug: payload.slug });
@@ -27,10 +29,21 @@ const updateSubCategory = async (id: string, payload: Partial<ISubCategory>) => 
   return subCategory;
 };
 
-const getSubCategoriesAdmin = async () => {
-  const subCategories = await SubCategory.find().populate("categoryId");
+const getSubCategoriesAdmin = async (query: Record<string, string>) => {
+  const { page, limit, skip } = extractSearchQuery(query);
 
-  return subCategories;
+  const subCategories = await SubCategory.find().populate("categoryId").skip(skip).limit(limit);
+
+  const total = await SubCategory.countDocuments();
+
+  const meta: IMeta = {
+    page,
+    limit,
+    skip,
+    total,
+  };
+
+  return { subCategories, meta };
 };
 
 export const SubCategoryServices = {

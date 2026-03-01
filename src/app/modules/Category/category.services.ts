@@ -5,6 +5,7 @@ import httpStatus from "http-status-codes";
 import { SubCategory } from "../Sub-Category/sub-category.model";
 import { extractSearchQuery } from "../../utils/extractSearchQuery";
 import { getSearchQuery } from "../../utils/getSearchQuery";
+import { IMeta } from "../../utils/sendResponse";
 
 const createCategory = async (payload: ICategory) => {
   const isCategoryExist = await Category.findOne({ title: payload.title });
@@ -48,7 +49,9 @@ const deleteCategory = async (id: string) => {
   return null;
 };
 
-const getCategoriesAdmin = async () => {
+const getCategoriesAdmin = async (query: Record<string, string>) => {
+  const { page, skip, limit } = extractSearchQuery(query);
+
   const categories = await Category.aggregate([
     {
       $lookup: {
@@ -68,9 +71,20 @@ const getCategoriesAdmin = async () => {
         subCategories: 0,
       },
     },
-  ]);
+  ])
+    .skip(skip)
+    .limit(limit);
 
-  return categories;
+  const total = await Category.countDocuments();
+
+  const meta: IMeta = {
+    page,
+    limit,
+    skip,
+    total,
+  };
+
+  return { categories, meta };
 };
 
 const getCategoriesWithSubCategories = async () => {

@@ -16,6 +16,7 @@ exports.SubCategoryServices = void 0;
 const sub_category_model_1 = require("./sub-category.model");
 const http_status_codes_1 = __importDefault(require("http-status-codes"));
 const AppError_1 = __importDefault(require("../../errorHelpers/AppError"));
+const extractSearchQuery_1 = require("../../utils/extractSearchQuery");
 const createSubCategory = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const isSubCategoryExist = yield sub_category_model_1.SubCategory.findOne({ slug: payload.slug });
     if (isSubCategoryExist) {
@@ -32,9 +33,17 @@ const updateSubCategory = (id, payload) => __awaiter(void 0, void 0, void 0, fun
     const subCategory = yield sub_category_model_1.SubCategory.findByIdAndUpdate(id, payload, { new: true });
     return subCategory;
 });
-const getSubCategoriesAdmin = () => __awaiter(void 0, void 0, void 0, function* () {
-    const subCategories = yield sub_category_model_1.SubCategory.find().populate("categoryId");
-    return subCategories;
+const getSubCategoriesAdmin = (query) => __awaiter(void 0, void 0, void 0, function* () {
+    const { page, limit, skip } = (0, extractSearchQuery_1.extractSearchQuery)(query);
+    const subCategories = yield sub_category_model_1.SubCategory.find().populate("categoryId").skip(skip).limit(limit);
+    const total = yield sub_category_model_1.SubCategory.countDocuments();
+    const meta = {
+        page,
+        limit,
+        skip,
+        total,
+    };
+    return { subCategories, meta };
 });
 exports.SubCategoryServices = {
     createSubCategory,

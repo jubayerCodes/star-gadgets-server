@@ -47,7 +47,8 @@ const deleteCategory = (id) => __awaiter(void 0, void 0, void 0, function* () {
     yield category_model_1.Category.findByIdAndDelete(id);
     return null;
 });
-const getCategoriesAdmin = () => __awaiter(void 0, void 0, void 0, function* () {
+const getCategoriesAdmin = (query) => __awaiter(void 0, void 0, void 0, function* () {
+    const { page, skip, limit } = (0, extractSearchQuery_1.extractSearchQuery)(query);
     const categories = yield category_model_1.Category.aggregate([
         {
             $lookup: {
@@ -67,8 +68,17 @@ const getCategoriesAdmin = () => __awaiter(void 0, void 0, void 0, function* () 
                 subCategories: 0,
             },
         },
-    ]);
-    return categories;
+    ])
+        .skip(skip)
+        .limit(limit);
+    const total = yield category_model_1.Category.countDocuments();
+    const meta = {
+        page,
+        limit,
+        skip,
+        total,
+    };
+    return { categories, meta };
 });
 const getCategoriesWithSubCategories = () => __awaiter(void 0, void 0, void 0, function* () {
     const categories = yield category_model_1.Category.aggregate([

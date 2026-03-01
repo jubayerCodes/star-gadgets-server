@@ -41,13 +41,14 @@ const updateSubCategory = catchAsync(async (req: Request, res: Response, next: N
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getSubCategoriesAdmin = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  const subCategories = await SubCategoryServices.getSubCategoriesAdmin();
+  const { subCategories, meta } = await SubCategoryServices.getSubCategoriesAdmin(req.query as Record<string, string>);
 
   sendResponse(res, {
     success: true,
     message: "Sub-Categories retrieved successfully",
     statusCode: httpStatus.OK,
     data: subCategories,
+    meta,
   });
 });
 
