@@ -8,7 +8,7 @@ const handleValidationError = (err: mongoose.Error.ValidationError): TGenericErr
         path: val?.path,
         message: val?.message,
       };
-    }
+    },
   );
 
   const statusCode = 400;

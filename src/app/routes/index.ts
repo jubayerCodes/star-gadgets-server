@@ -5,6 +5,7 @@ import { CategoryRoutes } from "../modules/Category/category.route";
 import { SubCategoryRoutes } from "../modules/Sub-Category/sub-category.route";
 import { ConfigRoutes } from "../modules/Configuration/config.routes";
 import { BrandRoutes } from "../modules/Brand/brand.route";
+import { UploadRoutes } from "../modules/Upload/upload.route";
 
 export const router = Router();
 
@@ -31,6 +32,10 @@ const moduleRoutes: {
   {
     path: "/brands",
     route: BrandRoutes,
+  },
+  {
+    path: "/uploads",
+    route: UploadRoutes,
   },
   {
     path: "/config",

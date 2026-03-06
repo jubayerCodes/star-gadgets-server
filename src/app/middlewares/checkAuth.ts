@@ -17,7 +17,7 @@ export const checkAuth =
       }
 
       const verifiedToken = verifyToken(token, envVars.JWT_SECRET) as JwtPayload;
-      
+
       if (!authRoles.includes(verifiedToken.role)) {
         throw new AppError(403, "You are not authorized to access this route");
       }

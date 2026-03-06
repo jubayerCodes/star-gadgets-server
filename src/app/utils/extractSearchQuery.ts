@@ -12,5 +12,12 @@ export const extractSearchQuery = (query: Record<string, string>) => {
   const pageNumber = parseInt(page) || DEFAULT_PAGE;
   const limitNumber = parseInt(limit) || DEFAULT_LIMIT;
 
-  return { page: pageNumber, limit: limitNumber, skip, sortBy, sortOrder, search };
+  return {
+    page: pageNumber,
+    limit: limitNumber,
+    skip,
+    sortBy,
+    sortOrder,
+    search,
+  };
 };

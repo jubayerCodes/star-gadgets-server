@@ -24,7 +24,9 @@ const updateSubCategory = async (id: string, payload: Partial<ISubCategory>) => 
     throw new AppError(httpStatus.BAD_REQUEST, "Sub Category not found");
   }
 
-  const subCategory = await SubCategory.findByIdAndUpdate(id, payload, { new: true });
+  const subCategory = await SubCategory.findByIdAndUpdate(id, payload, {
+    new: true,
+  });
 
   return subCategory;
 };
