@@ -9,7 +9,6 @@ import { sendResponse } from "../../utils/sendResponse";
 const createBrand = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const payload: IBrand = {
     ...req.body,
-    image: req.file?.path,
   };
 
   const brand = await BrandServices.createBrand(payload);
@@ -27,7 +26,6 @@ const updateBrand = catchAsync(async (req: Request, res: Response, next: NextFun
   const id = req.params.id as string;
   const payload: Partial<IBrand> = {
     ...req.body,
-    image: req.file?.path,
   };
 
   const brand = await BrandServices.updateBrand(id, payload);

@@ -9,7 +9,6 @@ import { SubCategoryServices } from "./sub-category.services";
 const createSubCategory = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const payload: ISubCategory = {
     ...req.body,
-    image: req.file?.path,
   };
 
   const subCategory = await SubCategoryServices.createSubCategory(payload);
@@ -24,9 +23,8 @@ const createSubCategory = catchAsync(async (req: Request, res: Response, next: N
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const updateSubCategory = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  const payload: ISubCategory = {
+  const payload: Partial<ISubCategory> = {
     ...req.body,
-    image: req.file?.path,
   };
 
   const subCategory = await SubCategoryServices.updateSubCategory(req.params.id as string, payload);

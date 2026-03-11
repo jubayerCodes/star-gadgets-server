@@ -12,7 +12,6 @@ import { getSearchQuery } from "../../utils/getSearchQuery";
 const createCategory = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const payload: ICategory = {
     ...req.body,
-    image: req.file?.path,
   };
 
   const category = await CategoryServices.createCategory(payload);
@@ -30,7 +29,6 @@ const updateCategory = catchAsync(async (req: Request, res: Response, next: Next
   const id = req.params.id as string;
   const payload: Partial<ICategory> = {
     ...req.body,
-    image: req.file?.path,
   };
 
   const category = await CategoryServices.updateCategory(id, payload);

@@ -11,6 +11,7 @@ export const createSubCategoryZodSchema = z.object({
     .max(50, "Slug must be at most 50 characters long"),
   featured: z.boolean().default(false),
   categoryId: z.string({ error: "Category ID is required" }),
+  image: z.string({ error: "Image is required" }).min(1, "Image is required"),
 });
 
 export const updateSubCategoryZodSchema = z.object({
@@ -26,4 +27,5 @@ export const updateSubCategoryZodSchema = z.object({
     .optional(),
   featured: z.boolean().optional(),
   categoryId: z.string({ error: "Category ID is required" }).optional(),
+  image: z.string().optional(),
 });

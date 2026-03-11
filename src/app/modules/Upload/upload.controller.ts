@@ -41,13 +41,14 @@ const uploadMultiple = catchAsync(async (req: Request, res: Response, next: Next
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getAllFiles = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  const files = await UploadServices.getAllFiles();
+  const { files, meta } = await UploadServices.getAllFiles(req.query as Record<string, string>);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
     message: "Files fetched successfully",
     data: files,
+    meta,
   });
 });
 
