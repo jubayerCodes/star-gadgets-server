@@ -50,8 +50,24 @@ const getSubCategoriesAdmin = catchAsync(async (req: Request, res: Response, nex
   });
 });
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const getSubCategoriesList = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const query = req.query as Record<string, string>;
+
+  const { subCategories, meta } = await SubCategoryServices.getSubCategoriesList(query);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Sub-Categories fetched successfully",
+    data: subCategories,
+    meta,
+  });
+});
+
 export const SubCategoryControllers = {
   createSubCategory,
   updateSubCategory,
   getSubCategoriesAdmin,
+  getSubCategoriesList,
 };

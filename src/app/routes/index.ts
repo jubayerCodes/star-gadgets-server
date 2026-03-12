@@ -6,6 +6,7 @@ import { SubCategoryRoutes } from "../modules/Sub-Category/sub-category.route";
 import { ConfigRoutes } from "../modules/Configuration/config.routes";
 import { BrandRoutes } from "../modules/Brand/brand.route";
 import { UploadRoutes } from "../modules/Upload/upload.route";
+import { ProductRoutes } from "../modules/Product/product.route";
 
 export const router = Router();
 
@@ -40,6 +41,10 @@ const moduleRoutes: {
   {
     path: "/config",
     route: ConfigRoutes,
+  },
+  {
+    path: "/products",
+    route: ProductRoutes,
   },
 ];
 

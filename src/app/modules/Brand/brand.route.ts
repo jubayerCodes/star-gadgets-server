@@ -24,3 +24,5 @@ BrandRoutes.patch(
 BrandRoutes.delete("/:id", checkAuth(Role.ADMIN), BrandController.deleteBrand);
 
 BrandRoutes.get("/admin", checkAuth(Role.ADMIN), BrandController.getBrandsAdmin);
+
+BrandRoutes.get("/list", BrandController.getBrandsList);

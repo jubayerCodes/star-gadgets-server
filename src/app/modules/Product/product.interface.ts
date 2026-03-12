@@ -29,6 +29,14 @@ export interface IVariant {
   isActive?: boolean;
 }
 
+export interface ISpecification {
+  heading: string;
+  specifications: {
+    name: string;
+    value: string;
+  }[];
+}
+
 export interface IProduct {
   _id?: Types.ObjectId;
   title: string;
@@ -39,12 +47,12 @@ export interface IProduct {
   categoryId: Types.ObjectId;
   isDeleted?: boolean;
   productCode: string;
-  keyFeatures: Record<string, string>;
-  specifications: Record<string, string>;
+  keyFeatures: string;
+  specifications: ISpecification[];
   isActive?: boolean;
   attributes: IProductAttribute[];
   variants: IVariant[];
-  description: Record<string, string>;
+  description: string;
   createdAt?: Date;
   updatedAt?: Date;
 }

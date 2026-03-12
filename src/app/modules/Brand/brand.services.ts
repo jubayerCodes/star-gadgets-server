@@ -1,5 +1,6 @@
 import AppError from "../../errorHelpers/AppError";
 import { extractSearchQuery } from "../../utils/extractSearchQuery";
+import { getSearchQuery } from "../../utils/getSearchQuery";
 import { IMeta } from "../../utils/sendResponse";
 import { IBrand } from "./brand.interface";
 import { Brand } from "./brand.model";
@@ -58,9 +59,29 @@ const getBrandsAdmin = async (query: Record<string, string>) => {
   return { brands, meta };
 };
 
+const getBrandsList = async (query: Record<string, string>) => {
+  const { limit, skip, search, page } = extractSearchQuery(query);
+
+  const searchQuery = getSearchQuery(search, ["title", "slug"]);
+
+  const brands = await Brand.find(searchQuery).select("title slug").sort({ title: 1 }).skip(skip).limit(limit);
+
+  const total = await Brand.countDocuments(searchQuery);
+
+  const meta: IMeta = {
+    page,
+    limit,
+    skip,
+    total,
+  };
+
+  return { brands, meta };
+};
+
 export const BrandServices = {
   createBrand,
   updateBrand,
   deleteBrand,
   getBrandsAdmin,
+  getBrandsList,
 };

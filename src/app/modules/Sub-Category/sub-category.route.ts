@@ -22,3 +22,5 @@ SubCategoryRoutes.patch(
 );
 
 SubCategoryRoutes.get("/admin", checkAuth(Role.ADMIN), SubCategoryControllers.getSubCategoriesAdmin);
+
+SubCategoryRoutes.get("/list", SubCategoryControllers.getSubCategoriesList);

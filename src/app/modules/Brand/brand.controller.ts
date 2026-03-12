@@ -65,9 +65,25 @@ const getBrandsAdmin = catchAsync(async (req: Request, res: Response, next: Next
   });
 });
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const getBrandsList = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const query = req.query as Record<string, string>;
+
+  const { brands, meta } = await BrandServices.getBrandsList(query);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Brands fetched successfully",
+    data: brands,
+    meta,
+  });
+});
+
 export const BrandController = {
   createBrand,
   updateBrand,
   deleteBrand,
   getBrandsAdmin,
+  getBrandsList,
 };

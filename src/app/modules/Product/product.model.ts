@@ -1,5 +1,5 @@
 import { Schema, model } from "mongoose";
-import { IProduct, IProductAttribute, IVariant, ProductStatus } from "./product.interface";
+import { IProduct, IProductAttribute, ISpecification, IVariant, ProductStatus } from "./product.interface";
 
 const productAttributeSchema = new Schema<IProductAttribute>(
   {
@@ -64,6 +64,22 @@ const variantSchema = new Schema<IVariant>({
   },
 });
 
+const specificationSchema = new Schema<ISpecification>({
+  heading: {
+    type: String,
+    required: true,
+  },
+  specifications: {
+    type: [
+      {
+        name: { type: String, required: true },
+        value: { type: String, required: true },
+      },
+    ],
+    required: true,
+  },
+});
+
 const productSchema = new Schema<IProduct>(
   {
     title: {
@@ -104,13 +120,11 @@ const productSchema = new Schema<IProduct>(
       unique: true,
     },
     keyFeatures: {
-      type: Map,
-      of: String,
+      type: String,
       required: true,
     },
     specifications: {
-      type: Map,
-      of: String,
+      type: [specificationSchema],
       required: true,
     },
     isActive: {
@@ -126,8 +140,7 @@ const productSchema = new Schema<IProduct>(
       required: true,
     },
     description: {
-      type: Map,
-      of: String,
+      type: String,
       required: true,
     },
   },

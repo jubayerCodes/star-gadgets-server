@@ -43,6 +43,19 @@ const variantZodSchema = z.object({
   isActive: z.boolean().default(true),
 });
 
+const specificationZodSchema = z.object({
+  heading: z.string({ error: "Specification heading is required" }),
+  specifications: z
+    .array(
+      z.object({
+        name: z.string({ error: "Specification name is required" }),
+        value: z.string({ error: "Specification value is required" }),
+      }),
+      { error: "Specifications are required" },
+    )
+    .min(1, "At least one specification is required"),
+});
+
 export const createProductZodSchema = z.object({
   title: z
     .string({ error: "Title is required" })
@@ -57,15 +70,9 @@ export const createProductZodSchema = z.object({
   brandId: z.string({ error: "Brand ID is required" }),
   categoryId: z.string({ error: "Category ID is required" }),
   productCode: z.string({ error: "Product code is required" }),
-  keyFeatures: z.record(z.string(), z.string(), {
-    error: "Key features must be a key-value map",
-  }),
-  specifications: z.record(z.string(), z.string(), {
-    error: "Specifications must be a key-value map",
-  }),
-  description: z.record(z.string(), z.string(), {
-    error: "Description must be a key-value map",
-  }),
+  keyFeatures: z.string({ error: "Key features are required" }),
+  specifications: z.array(specificationZodSchema, { error: "Specifications are required" }),
+  description: z.string({ error: "Description is required" }),
   isActive: z.boolean().default(true),
   isDeleted: z.boolean().default(false),
   attributes: z
@@ -90,21 +97,9 @@ export const updateProductZodSchema = z.object({
   brandId: z.string({ error: "Brand ID is required" }).optional(),
   categoryId: z.string({ error: "Category ID is required" }).optional(),
   productCode: z.string({ error: "Product code is required" }).optional(),
-  keyFeatures: z
-    .record(z.string(), z.string(), {
-      error: "Key features must be a key-value map",
-    })
-    .optional(),
-  specifications: z
-    .record(z.string(), z.string(), {
-      error: "Specifications must be a key-value map",
-    })
-    .optional(),
-  description: z
-    .record(z.string(), z.string(), {
-      error: "Description must be a key-value map",
-    })
-    .optional(),
+  keyFeatures: z.string({ error: "Key features are required" }).optional(),
+  specifications: z.array(specificationZodSchema, { error: "Specifications are required" }).optional(),
+  description: z.string({ error: "Description is required" }).optional(),
   isActive: z.boolean().optional(),
   isDeleted: z.boolean().optional(),
   attributes: z
