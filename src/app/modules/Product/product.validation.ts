@@ -11,16 +11,13 @@ const productAttributeZodSchema = z.object({
 });
 
 const variantAttributeZodSchema = z.object({
-  name: z.string({ error: "Variant attribute name is required" }),
-  value: z.string({ error: "Variant attribute value is required" }),
+  name: z.string(),
+  value: z.string(),
 });
 
 const variantZodSchema = z.object({
-  attributes: z
-    .array(variantAttributeZodSchema, {
-      error: "Variant attributes are required",
-    })
-    .min(1, "At least one variant attribute is required"),
+  // Variant attributes are optional — an empty array is valid
+  attributes: z.array(variantAttributeZodSchema).optional().default([]),
   price: z.number({ error: "Price is required" }).nonnegative("Price must be a non-negative number").optional(),
   regularPrice: z
     .number({ error: "Regular price is required" })
@@ -71,14 +68,13 @@ export const createProductZodSchema = z.object({
   categoryId: z.string({ error: "Category ID is required" }),
   productCode: z.string({ error: "Product code is required" }),
   keyFeatures: z.string({ error: "Key features are required" }),
-  specifications: z.array(specificationZodSchema, { error: "Specifications are required" }),
+  specifications: z.array(specificationZodSchema).min(1, "At least one specification group is required"),
   description: z.string({ error: "Description is required" }),
   isActive: z.boolean().default(true),
   isDeleted: z.boolean().default(false),
-  attributes: z
-    .array(productAttributeZodSchema, { error: "Attributes are required" })
-    .min(1, "At least one attribute is required"),
-  variants: z.array(variantZodSchema, { error: "Variants are required" }).min(1, "At least one variant is required"),
+  // Top-level attributes are optional — a product may have no attribute groups
+  attributes: z.array(productAttributeZodSchema).optional().default([]),
+  variants: z.array(variantZodSchema).min(1, "At least one variant is required"),
 });
 
 export const updateProductZodSchema = z.object({
@@ -98,16 +94,13 @@ export const updateProductZodSchema = z.object({
   categoryId: z.string({ error: "Category ID is required" }).optional(),
   productCode: z.string({ error: "Product code is required" }).optional(),
   keyFeatures: z.string({ error: "Key features are required" }).optional(),
-  specifications: z.array(specificationZodSchema, { error: "Specifications are required" }).optional(),
+  specifications: z.array(specificationZodSchema).min(1, "At least one specification group is required").optional(),
   description: z.string({ error: "Description is required" }).optional(),
   isActive: z.boolean().optional(),
   isDeleted: z.boolean().optional(),
-  attributes: z
-    .array(productAttributeZodSchema, { error: "Attributes are required" })
-    .min(1, "At least one attribute is required")
-    .optional(),
+  attributes: z.array(productAttributeZodSchema).optional(),
   variants: z
-    .array(variantZodSchema, { error: "Variants are required" })
+    .array(variantZodSchema)
     .min(1, "At least one variant is required")
     .optional(),
 });

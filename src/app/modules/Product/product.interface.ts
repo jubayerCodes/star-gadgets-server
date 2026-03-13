@@ -14,7 +14,8 @@ export interface IProductAttribute {
 
 export interface IVariant {
   _id?: Types.ObjectId;
-  attributes: {
+  // Variant attributes are optional — empty array is valid (e.g. product has no attribute groups)
+  attributes?: {
     name: string;
     value: string;
   }[];
@@ -50,7 +51,8 @@ export interface IProduct {
   keyFeatures: string;
   specifications: ISpecification[];
   isActive?: boolean;
-  attributes: IProductAttribute[];
+  // Top-level attributes are optional — a product may have no attribute groups
+  attributes?: IProductAttribute[];
   variants: IVariant[];
   description: string;
   createdAt?: Date;

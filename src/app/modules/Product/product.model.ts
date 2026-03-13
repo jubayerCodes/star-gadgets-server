@@ -16,14 +16,15 @@ const productAttributeSchema = new Schema<IProductAttribute>(
 );
 
 const variantSchema = new Schema<IVariant>({
+  // Variant attributes are optional — empty array is valid
   attributes: {
     type: [
       {
-        name: { type: String, required: true },
-        value: { type: String, required: true },
+        name: { type: String },
+        value: { type: String },
       },
     ],
-    required: true,
+    default: [],
   },
   price: {
     type: Number,
@@ -131,9 +132,10 @@ const productSchema = new Schema<IProduct>(
       type: Boolean,
       default: true,
     },
+    // Top-level attributes are optional — a product may have no attribute groups
     attributes: {
       type: [productAttributeSchema],
-      required: true,
+      default: [],
     },
     variants: {
       type: [variantSchema],
