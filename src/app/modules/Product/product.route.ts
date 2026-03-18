@@ -21,6 +21,8 @@ ProductRoutes.patch(
   ProductControllers.updateProduct,
 );
 
+ProductRoutes.get("/admin", checkAuth(Role.ADMIN), ProductControllers.getProductsAdmin);
+
 ProductRoutes.get("/:id", ProductControllers.getProductById);
 
 ProductRoutes.delete("/:id", checkAuth(Role.ADMIN), ProductControllers.deleteProduct);

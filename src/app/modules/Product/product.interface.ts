@@ -1,4 +1,7 @@
 import { Types } from "mongoose";
+import { ISubCategory } from "../Sub-Category/sub-category.interface";
+import { ICategory } from "../Category/category.interface";
+import { IBrand } from "../Brand/brand.interface";
 
 export enum ProductStatus {
   PRE_ORDER = "Pre Order",
@@ -36,6 +39,23 @@ export interface ISpecification {
     name: string;
     value: string;
   }[];
+}
+
+export interface IProductAdmin {
+  _id: Types.ObjectId;
+  title: string;
+  slug: string;
+  featuredImage: string;
+  productCode: string;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  priceRange: number | { min: number; max: number };
+  stock: number;
+  variants: IVariant[];
+  subCategoryId: ISubCategory;
+  categoryId: ICategory;
+  brandId: IBrand;
 }
 
 export interface IProduct {

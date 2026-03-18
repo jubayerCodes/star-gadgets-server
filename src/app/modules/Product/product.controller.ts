@@ -79,9 +79,23 @@ const deleteProduct = catchAsync(async (req: Request, res: Response, next: NextF
   });
 });
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const getProductsAdmin = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const { products, meta } = await ProductServices.getProductsAdmin(req.query as Record<string, string>);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Products fetched successfully",
+    data: products,
+    meta,
+  });
+});
+
 export const ProductControllers = {
   createProduct,
   getAllProducts,
+  getProductsAdmin,
   getProductById,
   updateProduct,
   deleteProduct,
