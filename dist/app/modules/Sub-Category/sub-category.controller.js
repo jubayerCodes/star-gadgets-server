@@ -18,8 +18,7 @@ const http_status_codes_1 = __importDefault(require("http-status-codes"));
 const sendResponse_1 = require("../../utils/sendResponse");
 const sub_category_services_1 = require("./sub-category.services");
 const createSubCategory = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    const payload = Object.assign(Object.assign({}, req.body), { image: (_a = req.file) === null || _a === void 0 ? void 0 : _a.path });
+    const payload = Object.assign({}, req.body);
     const subCategory = yield sub_category_services_1.SubCategoryServices.createSubCategory(payload);
     (0, sendResponse_1.sendResponse)(res, {
         statusCode: http_status_codes_1.default.CREATED,
@@ -29,8 +28,7 @@ const createSubCategory = (0, catchAsync_1.catchAsync)((req, res, next) => __awa
     });
 }));
 const updateSubCategory = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    const payload = Object.assign(Object.assign({}, req.body), { image: (_a = req.file) === null || _a === void 0 ? void 0 : _a.path });
+    const payload = Object.assign({}, req.body);
     const subCategory = yield sub_category_services_1.SubCategoryServices.updateSubCategory(req.params.id, payload);
     (0, sendResponse_1.sendResponse)(res, {
         statusCode: http_status_codes_1.default.OK,
@@ -49,8 +47,20 @@ const getSubCategoriesAdmin = (0, catchAsync_1.catchAsync)((req, res, next) => _
         meta,
     });
 }));
+const getSubCategoriesList = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const query = req.query;
+    const { subCategories, meta } = yield sub_category_services_1.SubCategoryServices.getSubCategoriesList(query);
+    (0, sendResponse_1.sendResponse)(res, {
+        statusCode: http_status_codes_1.default.OK,
+        success: true,
+        message: "Sub-Categories fetched successfully",
+        data: subCategories,
+        meta,
+    });
+}));
 exports.SubCategoryControllers = {
     createSubCategory,
     updateSubCategory,
     getSubCategoriesAdmin,
+    getSubCategoriesList,
 };

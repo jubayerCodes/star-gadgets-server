@@ -1,0 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.UploadRoutes = void 0;
+const express_1 = require("express");
+const multer_config_1 = require("../../config/multer.config");
+const upload_controller_1 = require("./upload.controller");
+const checkAuth_1 = require("../../middlewares/checkAuth");
+const user_interface_1 = require("../User/user.interface");
+exports.UploadRoutes = (0, express_1.Router)();
+exports.UploadRoutes.post("/single", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN), multer_config_1.multerUpload.single("file"), upload_controller_1.UploadController.uploadSingle);
+exports.UploadRoutes.post("/multiple", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN), multer_config_1.multerUpload.array("files"), upload_controller_1.UploadController.uploadMultiple);
+exports.UploadRoutes.get("/", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN), upload_controller_1.UploadController.getAllFiles);
+exports.UploadRoutes.delete("/:publicId", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN), upload_controller_1.UploadController.deleteFile);

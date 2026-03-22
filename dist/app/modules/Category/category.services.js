@@ -48,8 +48,16 @@ const deleteCategory = (id) => __awaiter(void 0, void 0, void 0, function* () {
     return null;
 });
 const getCategoriesAdmin = (query) => __awaiter(void 0, void 0, void 0, function* () {
-    const { page, skip, limit } = (0, extractSearchQuery_1.extractSearchQuery)(query);
+    const { page, skip, limit, search, sortBy, sortOrder } = (0, extractSearchQuery_1.extractSearchQuery)(query);
+    const filter = {};
+    if (search) {
+        Object.assign(filter, (0, getSearchQuery_1.getSearchQuery)(search, ["title", "slug"]));
+    }
+    if (query.featured !== undefined) {
+        filter.featured = query.featured === "true";
+    }
     const categories = yield category_model_1.Category.aggregate([
+        { $match: filter },
         {
             $lookup: {
                 from: "subcategories",
@@ -68,10 +76,11 @@ const getCategoriesAdmin = (query) => __awaiter(void 0, void 0, void 0, function
                 subCategories: 0,
             },
         },
-    ])
-        .skip(skip)
-        .limit(limit);
-    const total = yield category_model_1.Category.countDocuments();
+        { $sort: { [sortBy]: sortOrder === "asc" ? 1 : -1 } },
+        { $skip: skip },
+        { $limit: limit },
+    ]);
+    const total = yield category_model_1.Category.countDocuments(filter);
     const meta = {
         page,
         limit,

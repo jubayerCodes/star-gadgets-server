@@ -1,0 +1,16 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ProductRoutes = void 0;
+const express_1 = require("express");
+const product_controller_1 = require("./product.controller");
+const validateRequest_1 = require("../../middlewares/validateRequest");
+const product_validation_1 = require("./product.validation");
+const checkAuth_1 = require("../../middlewares/checkAuth");
+const user_interface_1 = require("../User/user.interface");
+exports.ProductRoutes = (0, express_1.Router)();
+exports.ProductRoutes.post("/", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN), (0, validateRequest_1.validateRequest)(product_validation_1.createProductZodSchema), product_controller_1.ProductControllers.createProduct);
+exports.ProductRoutes.patch("/:id", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN), (0, validateRequest_1.validateRequest)(product_validation_1.updateProductZodSchema), product_controller_1.ProductControllers.updateProduct);
+exports.ProductRoutes.get("/admin", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN), product_controller_1.ProductControllers.getProductsAdmin);
+exports.ProductRoutes.get("/:id", product_controller_1.ProductControllers.getProductById);
+exports.ProductRoutes.delete("/:id", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN), product_controller_1.ProductControllers.deleteProduct);
+exports.ProductRoutes.get("/", product_controller_1.ProductControllers.getAllProducts);

@@ -38,7 +38,10 @@ const createUser = (payload) => __awaiter(void 0, void 0, void 0, function* () {
         throw new AppError_1.default(http_status_codes_1.default === null || http_status_codes_1.default === void 0 ? void 0 : http_status_codes_1.default.BAD_REQUEST, "User Already Exist");
     }
     const hashedPassword = yield bcryptjs_1.default.hash(password, Number(env_1.envVars.BCRYPT_SALT_ROUNDS));
-    const authProvider = { provider: user_interface_1.Provider.LOCAL, providerId: email };
+    const authProvider = {
+        provider: user_interface_1.Provider.LOCAL,
+        providerId: email,
+    };
     const user = yield user_model_1.User.create(Object.assign({ email, password: hashedPassword, auths: [authProvider] }, rest));
     const tokens = (0, userTokens_1.createUserTokens)(user);
     const newUser = user.toObject();

@@ -21,8 +21,7 @@ const category_model_1 = require("./category.model");
 const extractSearchQuery_1 = require("../../utils/extractSearchQuery");
 const getSearchQuery_1 = require("../../utils/getSearchQuery");
 const createCategory = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    const payload = Object.assign(Object.assign({}, req.body), { image: (_a = req.file) === null || _a === void 0 ? void 0 : _a.path });
+    const payload = Object.assign({}, req.body);
     const category = yield category_services_1.CategoryServices.createCategory(payload);
     (0, sendResponse_1.sendResponse)(res, {
         statusCode: http_status_codes_1.default.OK,
@@ -32,9 +31,8 @@ const createCategory = (0, catchAsync_1.catchAsync)((req, res, next) => __awaite
     });
 }));
 const updateCategory = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
     const id = req.params.id;
-    const payload = Object.assign(Object.assign({}, req.body), { image: (_a = req.file) === null || _a === void 0 ? void 0 : _a.path });
+    const payload = Object.assign({}, req.body);
     const category = yield category_services_1.CategoryServices.updateCategory(id, payload);
     (0, sendResponse_1.sendResponse)(res, {
         statusCode: http_status_codes_1.default.OK,

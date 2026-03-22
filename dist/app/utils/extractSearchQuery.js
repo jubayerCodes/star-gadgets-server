@@ -12,6 +12,13 @@ const extractSearchQuery = (query) => {
     const skip = (0, exports.getSkip)(parseInt(page) || constants_1.DEFAULT_PAGE, parseInt(limit) || constants_1.DEFAULT_LIMIT);
     const pageNumber = parseInt(page) || constants_1.DEFAULT_PAGE;
     const limitNumber = parseInt(limit) || constants_1.DEFAULT_LIMIT;
-    return { page: pageNumber, limit: limitNumber, skip, sortBy, sortOrder, search };
+    return {
+        page: pageNumber,
+        limit: limitNumber,
+        skip,
+        sortBy,
+        sortOrder,
+        search,
+    };
 };
 exports.extractSearchQuery = extractSearchQuery;

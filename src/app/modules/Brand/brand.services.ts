@@ -43,11 +43,21 @@ const deleteBrand = async (id: string) => {
 };
 
 const getBrandsAdmin = async (query: Record<string, string>) => {
-  const { page, skip, limit } = extractSearchQuery(query);
+  const { page, skip, limit, search, sortBy, sortOrder } = extractSearchQuery(query);
 
-  const brands = await Brand.find().skip(skip).limit(limit);
+  const filter: Record<string, unknown> = {};
 
-  const total = await Brand.countDocuments();
+  if (search) {
+    Object.assign(filter, getSearchQuery(search, ["title", "slug"]));
+  }
+
+  if (query.featured !== undefined) {
+    filter.featured = query.featured === "true";
+  }
+
+  const brands = await Brand.find(filter).sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 }).skip(skip).limit(limit);
+
+  const total = await Brand.countDocuments(filter);
 
   const meta: IMeta = {
     page,

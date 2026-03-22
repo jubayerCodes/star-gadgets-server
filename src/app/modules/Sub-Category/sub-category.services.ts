@@ -1,4 +1,5 @@
 import { SubCategory } from "./sub-category.model";
+import { Category } from "../Category/category.model";
 import httpStatus from "http-status-codes";
 import { ISubCategory } from "./sub-category.interface";
 import AppError from "../../errorHelpers/AppError";
@@ -33,11 +34,35 @@ const updateSubCategory = async (id: string, payload: Partial<ISubCategory>) => 
 };
 
 const getSubCategoriesAdmin = async (query: Record<string, string>) => {
-  const { page, limit, skip } = extractSearchQuery(query);
+  const { page, limit, skip, search, sortBy, sortOrder } = extractSearchQuery(query);
 
-  const subCategories = await SubCategory.find().populate("categoryId").skip(skip).limit(limit);
+  const filter: Record<string, unknown> = {};
 
-  const total = await SubCategory.countDocuments();
+  if (search) {
+    Object.assign(filter, getSearchQuery(search, ["title", "slug"]));
+  }
+
+  if (query.featured !== undefined) {
+    filter.featured = query.featured === "true";
+  }
+
+  if (query.category) {
+    const category = await Category.findOne({ slug: query.category }).select("_id");
+    if (!category) {
+      throw new AppError(httpStatus.NOT_FOUND, `Category '${query.category}' not found`);
+    }
+    filter.categoryId = category._id;
+  } else if (query.categoryId) {
+    filter.categoryId = query.categoryId;
+  }
+
+  const subCategories = await SubCategory.find(filter)
+    .populate("categoryId")
+    .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 })
+    .skip(skip)
+    .limit(limit);
+
+  const total = await SubCategory.countDocuments(filter);
 
   const meta: IMeta = {
     page,
@@ -53,7 +78,14 @@ const getSubCategoriesList = async (query: Record<string, string>) => {
   const { limit, skip, search, page } = extractSearchQuery(query);
 
   const filter: Record<string, unknown> = { ...getSearchQuery(search, ["title", "slug"]) };
-  if (query.categoryId) {
+
+  if (query.category) {
+    const category = await Category.findOne({ slug: query.category }).select("_id");
+    if (!category) {
+      throw new AppError(httpStatus.NOT_FOUND, `Category '${query.category}' not found`);
+    }
+    filter.categoryId = category._id;
+  } else if (query.categoryId) {
     filter.categoryId = query.categoryId;
   }
 

@@ -2,15 +2,14 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CategoryRoutes = void 0;
 const express_1 = require("express");
-const multer_config_1 = require("../../config/multer.config");
 const category_controller_1 = require("./category.controller");
 const validateRequest_1 = require("../../middlewares/validateRequest");
 const category_validation_1 = require("./category.validation");
 const checkAuth_1 = require("../../middlewares/checkAuth");
 const user_interface_1 = require("../User/user.interface");
 exports.CategoryRoutes = (0, express_1.Router)();
-exports.CategoryRoutes.post("/", multer_config_1.multerUpload.single("file"), (0, validateRequest_1.validateRequest)(category_validation_1.createCategoryZodSchema), category_controller_1.CategoryControllers.createCategory);
-exports.CategoryRoutes.patch("/:id", multer_config_1.multerUpload.single("file"), (0, validateRequest_1.validateRequest)(category_validation_1.updateCategoryZodSchema), category_controller_1.CategoryControllers.updateCategory);
+exports.CategoryRoutes.post("/", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN), (0, validateRequest_1.validateRequest)(category_validation_1.createCategoryZodSchema), category_controller_1.CategoryControllers.createCategory);
+exports.CategoryRoutes.patch("/:id", (0, validateRequest_1.validateRequest)(category_validation_1.updateCategoryZodSchema), category_controller_1.CategoryControllers.updateCategory);
 exports.CategoryRoutes.get("/admin", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN), category_controller_1.CategoryControllers.getCategoriesAdmin);
 exports.CategoryRoutes.delete("/:id", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN), category_controller_1.CategoryControllers.deleteCategory);
 exports.CategoryRoutes.get("/list", category_controller_1.CategoryControllers.getCategoriesList);

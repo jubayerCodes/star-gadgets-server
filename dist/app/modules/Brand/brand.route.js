@@ -1,0 +1,15 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.BrandRoutes = void 0;
+const express_1 = require("express");
+const validateRequest_1 = require("../../middlewares/validateRequest");
+const brand_validation_1 = require("./brand.validation");
+const brand_controller_1 = require("./brand.controller");
+const checkAuth_1 = require("../../middlewares/checkAuth");
+const user_interface_1 = require("../User/user.interface");
+exports.BrandRoutes = (0, express_1.Router)();
+exports.BrandRoutes.post("/", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN), (0, validateRequest_1.validateRequest)(brand_validation_1.createBrandZodSchema), brand_controller_1.BrandController.createBrand);
+exports.BrandRoutes.patch("/:id", (0, validateRequest_1.validateRequest)(brand_validation_1.updateBrandZodSchema), brand_controller_1.BrandController.updateBrand);
+exports.BrandRoutes.delete("/:id", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN), brand_controller_1.BrandController.deleteBrand);
+exports.BrandRoutes.get("/admin", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN), brand_controller_1.BrandController.getBrandsAdmin);
+exports.BrandRoutes.get("/list", brand_controller_1.BrandController.getBrandsList);

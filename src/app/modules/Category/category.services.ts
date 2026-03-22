@@ -50,9 +50,20 @@ const deleteCategory = async (id: string) => {
 };
 
 const getCategoriesAdmin = async (query: Record<string, string>) => {
-  const { page, skip, limit } = extractSearchQuery(query);
+  const { page, skip, limit, search, sortBy, sortOrder } = extractSearchQuery(query);
+
+  const filter: Record<string, unknown> = {};
+
+  if (search) {
+    Object.assign(filter, getSearchQuery(search, ["title", "slug"]));
+  }
+
+  if (query.featured !== undefined) {
+    filter.featured = query.featured === "true";
+  }
 
   const categories = await Category.aggregate([
+    { $match: filter },
     {
       $lookup: {
         from: "subcategories",
@@ -71,11 +82,12 @@ const getCategoriesAdmin = async (query: Record<string, string>) => {
         subCategories: 0,
       },
     },
-  ])
-    .skip(skip)
-    .limit(limit);
+    { $sort: { [sortBy]: sortOrder === "asc" ? 1 : -1 } },
+    { $skip: skip },
+    { $limit: limit },
+  ]);
 
-  const total = await Category.countDocuments();
+  const total = await Category.countDocuments(filter);
 
   const meta: IMeta = {
     page,

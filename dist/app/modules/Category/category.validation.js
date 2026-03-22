@@ -11,6 +11,7 @@ exports.createCategoryZodSchema = zod_1.z.object({
         .string({ error: "Slug is required" })
         .min(2, "Slug must be at least 2 characters long")
         .max(50, "Slug must be at most 50 characters long"),
+    image: zod_1.z.string({ error: "Image is required" }).min(1, "Image is required"),
     featured: zod_1.z.boolean().default(false),
 });
 exports.updateCategoryZodSchema = zod_1.z.object({
@@ -24,5 +25,6 @@ exports.updateCategoryZodSchema = zod_1.z.object({
         .min(2, "Slug must be at least 2 characters long")
         .max(50, "Slug must be at most 50 characters long")
         .optional(),
+    image: zod_1.z.string().optional(),
     featured: zod_1.z.boolean().optional(),
 });

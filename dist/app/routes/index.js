@@ -7,6 +7,9 @@ const user_routes_1 = require("../modules/User/user.routes");
 const category_route_1 = require("../modules/Category/category.route");
 const sub_category_route_1 = require("../modules/Sub-Category/sub-category.route");
 const config_routes_1 = require("../modules/Configuration/config.routes");
+const brand_route_1 = require("../modules/Brand/brand.route");
+const upload_route_1 = require("../modules/Upload/upload.route");
+const product_route_1 = require("../modules/Product/product.route");
 exports.router = (0, express_1.Router)();
 const moduleRoutes = [
     {
@@ -26,8 +29,20 @@ const moduleRoutes = [
         route: sub_category_route_1.SubCategoryRoutes,
     },
     {
+        path: "/brands",
+        route: brand_route_1.BrandRoutes,
+    },
+    {
+        path: "/uploads",
+        route: upload_route_1.UploadRoutes,
+    },
+    {
         path: "/config",
         route: config_routes_1.ConfigRoutes,
+    },
+    {
+        path: "/products",
+        route: product_route_1.ProductRoutes,
     },
 ];
 moduleRoutes.forEach((route) => {
