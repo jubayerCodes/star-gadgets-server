@@ -29,9 +29,14 @@ const updateHeaderConfig = (id, payload) => __awaiter(void 0, void 0, void 0, fu
 const getConfig = () => __awaiter(void 0, void 0, void 0, function* () {
     const config = yield config_model_1.Config.aggregate([
         {
+            $addFields: {
+                "header.navLinksOrder": "$header.navLinks",
+            },
+        },
+        {
             $lookup: {
                 from: "categories",
-                let: { navLinks: "$header.navLinks" },
+                let: { navLinks: "$header.navLinksOrder" },
                 pipeline: [
                     {
                         $match: {
@@ -69,6 +74,30 @@ const getConfig = () => __awaiter(void 0, void 0, void 0, function* () {
                     },
                 ],
                 as: "header.navLinks",
+            },
+        },
+        {
+            $addFields: {
+                "header.navLinks": {
+                    $map: {
+                        input: "$header.navLinksOrder",
+                        as: "id",
+                        in: {
+                            $first: {
+                                $filter: {
+                                    input: "$header.navLinks",
+                                    as: "cat",
+                                    cond: { $eq: ["$$cat._id", "$$id"] },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        {
+            $project: {
+                "header.navLinksOrder": 0,
             },
         },
     ]);
