@@ -23,10 +23,17 @@ const updateHeaderConfig = async (id: string, payload: Pick<IConfig, "header">) 
 
 const getConfig = async () => {
   const config = await Config.aggregate([
+    // Step 1: Save the original ordered IDs before $lookup overwrites the field
+    {
+      $addFields: {
+        "header.navLinksOrder": "$header.navLinks",
+      },
+    },
+    // Step 2: Lookup and populate category documents
     {
       $lookup: {
         from: "categories",
-        let: { navLinks: "$header.navLinks" },
+        let: { navLinks: "$header.navLinksOrder" },
         pipeline: [
           {
             $match: {
@@ -64,6 +71,32 @@ const getConfig = async () => {
           },
         ],
         as: "header.navLinks",
+      },
+    },
+    // Step 3: Re-sort navLinks to match the original stored ID order
+    {
+      $addFields: {
+        "header.navLinks": {
+          $map: {
+            input: "$header.navLinksOrder",
+            as: "id",
+            in: {
+              $first: {
+                $filter: {
+                  input: "$header.navLinks",
+                  as: "cat",
+                  cond: { $eq: ["$$cat._id", "$$id"] },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    // Step 4: Remove the temporary ordering field
+    {
+      $project: {
+        "header.navLinksOrder": 0,
       },
     },
   ]);
