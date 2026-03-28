@@ -26,6 +26,16 @@ const updateHeaderConfig = (id, payload) => __awaiter(void 0, void 0, void 0, fu
     }, { new: true });
     return updatedConfig;
 });
+const updateHeroConfig = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const isConfigExist = yield config_model_1.Config.findById(id);
+    if (!isConfigExist) {
+        throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "Config not found");
+    }
+    const updatedConfig = yield config_model_1.Config.findByIdAndUpdate(id, {
+        hero: payload.hero,
+    }, { new: true });
+    return updatedConfig;
+});
 const getConfig = () => __awaiter(void 0, void 0, void 0, function* () {
     const config = yield config_model_1.Config.aggregate([
         {
@@ -108,5 +118,6 @@ const getConfig = () => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.ConfigServices = {
     updateHeaderConfig,
+    updateHeroConfig,
     getConfig,
 };

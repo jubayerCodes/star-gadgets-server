@@ -1,10 +1,55 @@
 import { model, Schema, Types } from "mongoose";
 import { IConfig } from "./config.interface";
 
+const heroFixedItemSchema = new Schema(
+  {
+    id: { type: String, required: true },
+    image: { type: String, required: true },
+    link: { type: String, required: true },
+  },
+  { _id: false },
+);
+
+const heroCarouselItemSchema = new Schema(
+  {
+    id: { type: String, required: true },
+    image: { type: String, required: true },
+    button: { type: String, required: true },
+    buttonLink: { type: String, required: true },
+  },
+  { _id: false },
+);
+
+// Combined hero item schema (superset of both types)
+const heroItemSchema = new Schema(
+  {
+    id: { type: String, required: true },
+    image: { type: String, required: true },
+    link: { type: String },
+    button: { type: String },
+    buttonLink: { type: String },
+  },
+  { _id: false },
+);
+
+// Keep sub-schemas exported for reuse / validation reference
+export { heroFixedItemSchema, heroCarouselItemSchema };
+
 const configSchema = new Schema<IConfig>(
   {
     header: {
       navLinks: [{ type: Types.ObjectId, ref: "Category" }],
+    },
+    hero: {
+      heroType: {
+        type: String,
+        enum: ["fixed", "carousel"],
+        default: "fixed",
+      },
+      heroContent: {
+        type: [heroItemSchema],
+        default: [],
+      },
     },
   },
   { timestamps: true, versionKey: false },
