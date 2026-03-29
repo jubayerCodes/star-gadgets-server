@@ -20,18 +20,6 @@ const heroCarouselItemSchema = new Schema(
   { _id: false },
 );
 
-// Combined hero item schema (superset of both types)
-const heroItemSchema = new Schema(
-  {
-    id: { type: String, required: true },
-    image: { type: String, required: true },
-    link: { type: String },
-    button: { type: String },
-    buttonLink: { type: String },
-  },
-  { _id: false },
-);
-
 // Keep sub-schemas exported for reuse / validation reference
 export { heroFixedItemSchema, heroCarouselItemSchema };
 
@@ -46,8 +34,12 @@ const configSchema = new Schema<IConfig>(
         enum: ["fixed", "carousel"],
         default: "fixed",
       },
-      heroContent: {
-        type: [heroItemSchema],
+      fixedContent: {
+        type: [heroFixedItemSchema],
+        default: [],
+      },
+      carouselContent: {
+        type: [heroCarouselItemSchema],
         default: [],
       },
     },

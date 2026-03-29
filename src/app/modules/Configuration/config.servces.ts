@@ -23,7 +23,7 @@ const updateHeaderConfig = async (id: string, payload: Pick<IConfig, "header">) 
 
 const updateHeroConfig = async (
   id: string,
-  payload: Pick<IConfig, "hero">,
+  payload: Partial<IConfig>,
 ) => {
   const isConfigExist = await Config.findById(id);
 
@@ -31,11 +31,20 @@ const updateHeroConfig = async (
     throw new AppError(httpStatus.NOT_FOUND, "Config not found");
   }
 
+  const updateData: Record<string, unknown> = {};
+  if (payload.hero?.heroType !== undefined) {
+    updateData["hero.heroType"] = payload.hero.heroType;
+  }
+  if (payload.hero?.fixedContent !== undefined) {
+    updateData["hero.fixedContent"] = payload.hero.fixedContent;
+  }
+  if (payload.hero?.carouselContent !== undefined) {
+    updateData["hero.carouselContent"] = payload.hero.carouselContent;
+  }
+
   const updatedConfig = await Config.findByIdAndUpdate(
     id,
-    {
-      hero: payload.hero,
-    },
+    { $set: updateData },
     { new: true },
   );
 

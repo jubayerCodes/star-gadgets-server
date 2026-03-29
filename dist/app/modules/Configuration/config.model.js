@@ -15,13 +15,6 @@ const heroCarouselItemSchema = new mongoose_1.Schema({
     buttonLink: { type: String, required: true },
 }, { _id: false });
 exports.heroCarouselItemSchema = heroCarouselItemSchema;
-const heroItemSchema = new mongoose_1.Schema({
-    id: { type: String, required: true },
-    image: { type: String, required: true },
-    link: { type: String },
-    button: { type: String },
-    buttonLink: { type: String },
-}, { _id: false });
 const configSchema = new mongoose_1.Schema({
     header: {
         navLinks: [{ type: mongoose_1.Types.ObjectId, ref: "Category" }],
@@ -32,8 +25,12 @@ const configSchema = new mongoose_1.Schema({
             enum: ["fixed", "carousel"],
             default: "fixed",
         },
-        heroContent: {
-            type: [heroItemSchema],
+        fixedContent: {
+            type: [heroFixedItemSchema],
+            default: [],
+        },
+        carouselContent: {
+            type: [heroCarouselItemSchema],
             default: [],
         },
     },

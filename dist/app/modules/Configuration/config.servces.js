@@ -27,13 +27,22 @@ const updateHeaderConfig = (id, payload) => __awaiter(void 0, void 0, void 0, fu
     return updatedConfig;
 });
 const updateHeroConfig = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b, _c;
     const isConfigExist = yield config_model_1.Config.findById(id);
     if (!isConfigExist) {
         throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "Config not found");
     }
-    const updatedConfig = yield config_model_1.Config.findByIdAndUpdate(id, {
-        hero: payload.hero,
-    }, { new: true });
+    const updateData = {};
+    if (((_a = payload.hero) === null || _a === void 0 ? void 0 : _a.heroType) !== undefined) {
+        updateData["hero.heroType"] = payload.hero.heroType;
+    }
+    if (((_b = payload.hero) === null || _b === void 0 ? void 0 : _b.fixedContent) !== undefined) {
+        updateData["hero.fixedContent"] = payload.hero.fixedContent;
+    }
+    if (((_c = payload.hero) === null || _c === void 0 ? void 0 : _c.carouselContent) !== undefined) {
+        updateData["hero.carouselContent"] = payload.hero.carouselContent;
+    }
+    const updatedConfig = yield config_model_1.Config.findByIdAndUpdate(id, { $set: updateData }, { new: true });
     return updatedConfig;
 });
 const getConfig = () => __awaiter(void 0, void 0, void 0, function* () {

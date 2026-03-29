@@ -21,11 +21,9 @@ export const updateHeaderConfigValidation = z.object({
 
 export const updateHeroConfigValidation = z.object({
   hero: z.object({
-    heroType: z.enum(["fixed", "carousel"]),
-    heroContent: z.union([
-      z.array(heroFixedItemSchema).max(3),
-      z.array(heroCarouselItemSchema),
-    ]),
+    heroType: z.enum(["fixed", "carousel"]).optional(),
+    fixedContent: z.array(heroFixedItemSchema).max(3).optional(),
+    carouselContent: z.array(heroCarouselItemSchema).optional(),
   }),
 });
 
@@ -37,11 +35,9 @@ export const updateConfigValidation = z.object({
     .optional(),
   hero: z
     .object({
-      heroType: z.enum(["fixed", "carousel"]),
-      heroContent: z.union([
-        z.array(heroFixedItemSchema).max(3),
-        z.array(heroCarouselItemSchema),
-      ]),
+      heroType: z.enum(["fixed", "carousel"]).optional(),
+      fixedContent: z.array(heroFixedItemSchema).max(3).optional(),
+      carouselContent: z.array(heroCarouselItemSchema).optional(),
     })
     .optional(),
 });

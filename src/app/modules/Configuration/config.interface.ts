@@ -16,14 +16,7 @@ export interface IHeroCarouselItem {
   buttonLink: string;
 }
 
-// Superset type — used for Mongoose schema (compatible with both hero variants)
-export interface THeroItem {
-  id: string;
-  image: string;
-  link?: string;
-  button?: string;
-  buttonLink?: string;
-}
+// Superset type is no longer needed since we store both separately
 
 export interface IConfig {
   _id?: Types.ObjectId;
@@ -32,7 +25,8 @@ export interface IConfig {
   };
   hero: {
     heroType: "fixed" | "carousel";
-    heroContent: THeroItem[];
+    fixedContent: IHeroFixedItem[];
+    carouselContent: IHeroCarouselItem[];
   };
 }
 
@@ -41,7 +35,8 @@ export interface IConfigResponse {
   header: IHeaderConfigResponse;
   hero: {
     heroType: "fixed" | "carousel";
-    heroContent: IHeroFixedItem[] | IHeroCarouselItem[];
+    fixedContent: IHeroFixedItem[];
+    carouselContent: IHeroCarouselItem[];
   };
 }
 

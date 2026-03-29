@@ -20,11 +20,9 @@ exports.updateHeaderConfigValidation = zod_1.z.object({
 });
 exports.updateHeroConfigValidation = zod_1.z.object({
     hero: zod_1.z.object({
-        heroType: zod_1.z.enum(["fixed", "carousel"]),
-        heroContent: zod_1.z.union([
-            zod_1.z.array(heroFixedItemSchema).max(3),
-            zod_1.z.array(heroCarouselItemSchema),
-        ]),
+        heroType: zod_1.z.enum(["fixed", "carousel"]).optional(),
+        fixedContent: zod_1.z.array(heroFixedItemSchema).max(3).optional(),
+        carouselContent: zod_1.z.array(heroCarouselItemSchema).optional(),
     }),
 });
 exports.updateConfigValidation = zod_1.z.object({
@@ -35,11 +33,9 @@ exports.updateConfigValidation = zod_1.z.object({
         .optional(),
     hero: zod_1.z
         .object({
-        heroType: zod_1.z.enum(["fixed", "carousel"]),
-        heroContent: zod_1.z.union([
-            zod_1.z.array(heroFixedItemSchema).max(3),
-            zod_1.z.array(heroCarouselItemSchema),
-        ]),
+        heroType: zod_1.z.enum(["fixed", "carousel"]).optional(),
+        fixedContent: zod_1.z.array(heroFixedItemSchema).max(3).optional(),
+        carouselContent: zod_1.z.array(heroCarouselItemSchema).optional(),
     })
         .optional(),
 });
