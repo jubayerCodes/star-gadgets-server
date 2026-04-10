@@ -3,5 +3,5 @@ services:
     name: star-gadgets-server
     env: node
     plan: free
-    buildCommand: npm install
+    buildCommand: npm install && npm run build
     startCommand: npm start
