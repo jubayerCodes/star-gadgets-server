@@ -23,6 +23,12 @@ ProductRoutes.patch(
 
 ProductRoutes.get("/admin", checkAuth(Role.ADMIN), ProductControllers.getProductsAdmin);
 
+ProductRoutes.get("/featured", ProductControllers.getFeaturedProducts);
+
+ProductRoutes.get("/search", ProductControllers.searchProducts);
+
+ProductRoutes.get("/slug/:slug", ProductControllers.getProductBySlug);
+
 ProductRoutes.get("/:id", ProductControllers.getProductById);
 
 ProductRoutes.delete("/:id", checkAuth(Role.ADMIN), ProductControllers.deleteProduct);

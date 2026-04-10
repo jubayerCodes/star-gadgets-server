@@ -1,5 +1,6 @@
 import { IProduct } from "./product.interface";
 import { Product } from "./product.model";
+import { PipelineStage } from "mongoose";
 import AppError from "../../errorHelpers/AppError";
 import httpStatus from "http-status-codes";
 import { extractSearchQuery } from "../../utils/extractSearchQuery";
@@ -59,6 +60,16 @@ const getProductById = async (id: string) => {
   return product;
 };
 
+const getProductBySlug = async (slug: string) => {
+  const product = await Product.findOne({ slug, isDeleted: false }).populate("categoryId brandId subCategoryId");
+
+  if (!product) {
+    throw new AppError(httpStatus.NOT_FOUND, "Product not found");
+  }
+
+  return product;
+};
+
 const updateProduct = async (id: string, payload: Partial<IProduct>) => {
   const isProductExist = await Product.findOne({ _id: id, isDeleted: false });
 
@@ -80,7 +91,7 @@ const updateProduct = async (id: string, payload: Partial<IProduct>) => {
     }
   }
 
-  const product = await Product.findByIdAndUpdate(id, payload, { new: true });
+  const product = await Product.findByIdAndUpdate(id, payload, { returnDocument: "after" });
 
   return product;
 };
@@ -93,14 +104,14 @@ const deleteProduct = async (id: string) => {
   }
 
   // Soft delete
-  await Product.findByIdAndUpdate(id, { isDeleted: true }, { new: true });
+  await Product.findByIdAndUpdate(id, { isDeleted: true }, { returnDocument: "after" });
 
   return null;
 };
 
 const getProductsAdmin = async (query: Record<string, string>) => {
   const { page, skip, limit, search, sortBy, sortOrder } = extractSearchQuery(query);
-  const { minPrice, maxPrice, category, subCategory, brand, isActive } = query;
+  const { minPrice, maxPrice, category, subCategory, brand, isActive, isFeatured } = query;
 
   const searchQuery = getSearchQuery(search, ["title", "slug", "productCode"]);
 
@@ -108,6 +119,7 @@ const getProductsAdmin = async (query: Record<string, string>) => {
 
   // Filter by isActive if provided
   if (isActive !== undefined) matchStage.isActive = isActive === "true";
+  if (isFeatured !== undefined) matchStage.isFeatured = isFeatured === "true";
 
   // Build price range filter — applied after $addFields computes minPrice / maxPrice
   const priceMatchConditions: Record<string, unknown> = {};
@@ -181,6 +193,7 @@ const getProductsAdmin = async (query: Record<string, string>) => {
         featuredImage: 1,
         productCode: 1,
         isActive: 1,
+        isFeatured: 1,
         createdAt: 1,
         updatedAt: 1,
         priceRange: 1,
@@ -210,11 +223,137 @@ const getProductsAdmin = async (query: Record<string, string>) => {
   return { products, meta };
 };
 
+const getFeaturedProducts = async () => {
+  const pipeline = [
+    { $match: { isDeleted: false, isActive: true, isFeatured: true } },
+    { $sort: { createdAt: -1 } },
+    { $lookup: { from: "categories", localField: "categoryId", foreignField: "_id", as: "categoryId" } },
+    { $unwind: { path: "$categoryId", preserveNullAndEmptyArrays: false } },
+    { $lookup: { from: "brands", localField: "brandId", foreignField: "_id", as: "brandId" } },
+    { $unwind: { path: "$brandId", preserveNullAndEmptyArrays: false } },
+    {
+      $project: {
+        _id: 1,
+        title: 1,
+        slug: 1,
+        badges: 1,
+        category: { _id: "$categoryId._id", title: "$categoryId.title", slug: "$categoryId.slug" },
+        brand: { _id: "$brandId._id", title: "$brandId.title", slug: "$brandId.slug" },
+        featuredVariant: {
+          $let: {
+            vars: {
+              featuredVals: {
+                $filter: {
+                  input: "$variants",
+                  as: "variant",
+                  cond: { $eq: ["$$variant.featured", true] },
+                },
+              },
+            },
+            in: {
+              $cond: {
+                if: { $gt: [{ $size: "$$featuredVals" }, 0] },
+                then: { $arrayElemAt: ["$$featuredVals", 0] },
+                else: { $arrayElemAt: ["$variants", 0] },
+              },
+            },
+          },
+        },
+      },
+    },
+  ];
+
+  const products = await Product.aggregate(pipeline as PipelineStage[]);
+  return products;
+};
+
+const searchProducts = async (query: string) => {
+  // Build a fuzzy regex: split on whitespace and allow each token to match
+  // loosely — each character may be followed by .* so small typos / missing
+  // letters are still caught. All tokens must appear (lookahead AND chain).
+  const tokens = query
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")); // escape special chars
+
+  // Each token becomes a fuzzy pattern: letters joined by \w*? (e.g. "iphne" → i\w*?p\w*?h\w*?n\w*?e)
+  const fuzzyPattern = (token: string) => token.split("").join("\\w*?");
+
+  // Combine tokens as AND lookaheads on the full string
+  const combinedPattern = tokens.length > 0 ? tokens.map((t) => `(?=.*${fuzzyPattern(t)})`).join("") : query;
+
+  const regex = new RegExp(combinedPattern, "i");
+
+  const pipeline: PipelineStage[] = [
+    {
+      $match: {
+        isDeleted: false,
+        isActive: true,
+        $or: [{ title: regex }, { slug: regex }, { productCode: regex }],
+      },
+    },
+
+    // Compute priceRange from variants
+    {
+      $addFields: {
+        minPrice: { $min: "$variants.price" },
+        maxPrice: { $max: "$variants.price" },
+      },
+    },
+    {
+      $addFields: {
+        priceRange: {
+          $cond: {
+            if: { $eq: ["$minPrice", "$maxPrice"] },
+            then: "$minPrice",
+            else: { min: "$minPrice", max: "$maxPrice" },
+          },
+        },
+      },
+    },
+
+    // Populate subCategory
+    {
+      $lookup: {
+        from: "subcategories",
+        localField: "subCategoryId",
+        foreignField: "_id",
+        as: "subCategoryId",
+      },
+    },
+    { $unwind: { path: "$subCategoryId", preserveNullAndEmptyArrays: true } },
+
+    { $limit: 20 },
+
+    {
+      $project: {
+        _id: 1,
+        title: 1,
+        slug: 1,
+        featuredImage: 1,
+        priceRange: 1,
+        subCategoryId: {
+          _id: "$subCategoryId._id",
+          title: "$subCategoryId.title",
+          slug: "$subCategoryId.slug",
+        },
+      },
+    },
+  ];
+
+  const products = await Product.aggregate(pipeline);
+  return products;
+};
+
 export const ProductServices = {
   createProduct,
   getAllProducts,
   getProductsAdmin,
   getProductById,
+  getProductBySlug,
   updateProduct,
   deleteProduct,
+  getFeaturedProducts,
+  searchProducts,
 };

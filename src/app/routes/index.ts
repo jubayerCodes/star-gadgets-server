@@ -7,6 +7,7 @@ import { ConfigRoutes } from "../modules/Configuration/config.routes";
 import { BrandRoutes } from "../modules/Brand/brand.route";
 import { UploadRoutes } from "../modules/Upload/upload.route";
 import { ProductRoutes } from "../modules/Product/product.route";
+import { BadgeRoutes } from "../modules/Badge/badge.route";
 
 export const router = Router();
 
@@ -45,6 +46,10 @@ const moduleRoutes: {
   {
     path: "/products",
     route: ProductRoutes,
+  },
+  {
+    path: "/badges",
+    route: BadgeRoutes,
   },
 ];
 

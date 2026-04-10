@@ -31,7 +31,7 @@ const updateBrand = (id, payload) => __awaiter(void 0, void 0, void 0, function*
     if (!isBrandExist) {
         throw new AppError_1.default(http_status_codes_1.default.BAD_REQUEST, "Brand not found");
     }
-    const brand = yield brand_model_1.Brand.findByIdAndUpdate(id, payload, { new: true });
+    const brand = yield brand_model_1.Brand.findByIdAndUpdate(id, payload, { returnDocument: "after" });
     return brand;
 });
 const deleteBrand = (id) => __awaiter(void 0, void 0, void 0, function* () {
@@ -51,7 +51,10 @@ const getBrandsAdmin = (query) => __awaiter(void 0, void 0, void 0, function* ()
     if (query.featured !== undefined) {
         filter.featured = query.featured === "true";
     }
-    const brands = yield brand_model_1.Brand.find(filter).sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 }).skip(skip).limit(limit);
+    const brands = yield brand_model_1.Brand.find(filter)
+        .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 })
+        .skip(skip)
+        .limit(limit);
     const total = yield brand_model_1.Brand.countDocuments(filter);
     const meta = {
         page,

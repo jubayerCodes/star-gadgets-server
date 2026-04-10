@@ -33,7 +33,7 @@ const updateSubCategory = (id, payload) => __awaiter(void 0, void 0, void 0, fun
         throw new AppError_1.default(http_status_codes_1.default.BAD_REQUEST, "Sub Category not found");
     }
     const subCategory = yield sub_category_model_1.SubCategory.findByIdAndUpdate(id, payload, {
-        new: true,
+        returnDocument: "after",
     });
     return subCategory;
 });

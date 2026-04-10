@@ -15,16 +15,13 @@ const updateHeaderConfig = async (id: string, payload: Pick<IConfig, "header">) 
     {
       header: payload?.header,
     },
-    { new: true },
+    { returnDocument: "after" },
   );
 
   return updatedConfig;
 };
 
-const updateHeroConfig = async (
-  id: string,
-  payload: Partial<IConfig>,
-) => {
+const updateHeroConfig = async (id: string, payload: Partial<IConfig>) => {
   const isConfigExist = await Config.findById(id);
 
   if (!isConfigExist) {
@@ -42,11 +39,7 @@ const updateHeroConfig = async (
     updateData["hero.carouselContent"] = payload.hero.carouselContent;
   }
 
-  const updatedConfig = await Config.findByIdAndUpdate(
-    id,
-    { $set: updateData },
-    { new: true },
-  );
+  const updatedConfig = await Config.findByIdAndUpdate(id, { $set: updateData }, { returnDocument: "after" });
 
   return updatedConfig;
 };

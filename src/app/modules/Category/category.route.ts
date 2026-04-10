@@ -14,11 +14,7 @@ CategoryRoutes.post(
   CategoryControllers.createCategory,
 );
 
-CategoryRoutes.patch(
-  "/:id",
-  validateRequest(updateCategoryZodSchema),
-  CategoryControllers.updateCategory,
-);
+CategoryRoutes.patch("/:id", validateRequest(updateCategoryZodSchema), CategoryControllers.updateCategory);
 
 CategoryRoutes.get("/admin", checkAuth(Role.ADMIN), CategoryControllers.getCategoriesAdmin);
 

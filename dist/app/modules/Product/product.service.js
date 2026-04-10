@@ -55,6 +55,13 @@ const getProductById = (id) => __awaiter(void 0, void 0, void 0, function* () {
     }
     return product;
 });
+const getProductBySlug = (slug) => __awaiter(void 0, void 0, void 0, function* () {
+    const product = yield product_model_1.Product.findOne({ slug, isDeleted: false }).populate("categoryId brandId subCategoryId");
+    if (!product) {
+        throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "Product not found");
+    }
+    return product;
+});
 const updateProduct = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
     const isProductExist = yield product_model_1.Product.findOne({ _id: id, isDeleted: false });
     if (!isProductExist) {
@@ -72,7 +79,7 @@ const updateProduct = (id, payload) => __awaiter(void 0, void 0, void 0, functio
             throw new AppError_1.default(http_status_codes_1.default.BAD_REQUEST, "Product with this code already exists");
         }
     }
-    const product = yield product_model_1.Product.findByIdAndUpdate(id, payload, { new: true });
+    const product = yield product_model_1.Product.findByIdAndUpdate(id, payload, { returnDocument: "after" });
     return product;
 });
 const deleteProduct = (id) => __awaiter(void 0, void 0, void 0, function* () {
@@ -80,17 +87,19 @@ const deleteProduct = (id) => __awaiter(void 0, void 0, void 0, function* () {
     if (!isProductExist) {
         throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "Product not found");
     }
-    yield product_model_1.Product.findByIdAndUpdate(id, { isDeleted: true }, { new: true });
+    yield product_model_1.Product.findByIdAndUpdate(id, { isDeleted: true }, { returnDocument: "after" });
     return null;
 });
 const getProductsAdmin = (query) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b, _c;
     const { page, skip, limit, search, sortBy, sortOrder } = (0, extractSearchQuery_1.extractSearchQuery)(query);
-    const { minPrice, maxPrice, category, subCategory, brand, isActive } = query;
+    const { minPrice, maxPrice, category, subCategory, brand, isActive, isFeatured } = query;
     const searchQuery = (0, getSearchQuery_1.getSearchQuery)(search, ["title", "slug", "productCode"]);
     const matchStage = Object.assign(Object.assign({}, searchQuery), { isDeleted: false });
     if (isActive !== undefined)
         matchStage.isActive = isActive === "true";
+    if (isFeatured !== undefined)
+        matchStage.isFeatured = isFeatured === "true";
     const priceMatchConditions = {};
     if (minPrice)
         priceMatchConditions.minPrice = { $gte: Number(minPrice) };
@@ -149,6 +158,7 @@ const getProductsAdmin = (query) => __awaiter(void 0, void 0, void 0, function* 
                 featuredImage: 1,
                 productCode: 1,
                 isActive: 1,
+                isFeatured: 1,
                 createdAt: 1,
                 updatedAt: 1,
                 priceRange: 1,
@@ -172,11 +182,118 @@ const getProductsAdmin = (query) => __awaiter(void 0, void 0, void 0, function* 
     };
     return { products, meta };
 });
+const getFeaturedProducts = () => __awaiter(void 0, void 0, void 0, function* () {
+    const pipeline = [
+        { $match: { isDeleted: false, isActive: true, isFeatured: true } },
+        { $sort: { createdAt: -1 } },
+        { $lookup: { from: "categories", localField: "categoryId", foreignField: "_id", as: "categoryId" } },
+        { $unwind: { path: "$categoryId", preserveNullAndEmptyArrays: false } },
+        { $lookup: { from: "brands", localField: "brandId", foreignField: "_id", as: "brandId" } },
+        { $unwind: { path: "$brandId", preserveNullAndEmptyArrays: false } },
+        {
+            $project: {
+                _id: 1,
+                title: 1,
+                slug: 1,
+                badges: 1,
+                category: { _id: "$categoryId._id", title: "$categoryId.title", slug: "$categoryId.slug" },
+                brand: { _id: "$brandId._id", title: "$brandId.title", slug: "$brandId.slug" },
+                featuredVariant: {
+                    $let: {
+                        vars: {
+                            featuredVals: {
+                                $filter: {
+                                    input: "$variants",
+                                    as: "variant",
+                                    cond: { $eq: ["$$variant.featured", true] },
+                                },
+                            },
+                        },
+                        in: {
+                            $cond: {
+                                if: { $gt: [{ $size: "$$featuredVals" }, 0] },
+                                then: { $arrayElemAt: ["$$featuredVals", 0] },
+                                else: { $arrayElemAt: ["$variants", 0] },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    ];
+    const products = yield product_model_1.Product.aggregate(pipeline);
+    return products;
+});
+const searchProducts = (query) => __awaiter(void 0, void 0, void 0, function* () {
+    const tokens = query
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
+        .map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+    const fuzzyPattern = (token) => token.split("").join("\\w*?");
+    const combinedPattern = tokens.length > 0 ? tokens.map((t) => `(?=.*${fuzzyPattern(t)})`).join("") : query;
+    const regex = new RegExp(combinedPattern, "i");
+    const pipeline = [
+        {
+            $match: {
+                isDeleted: false,
+                isActive: true,
+                $or: [{ title: regex }, { slug: regex }, { productCode: regex }],
+            },
+        },
+        {
+            $addFields: {
+                minPrice: { $min: "$variants.price" },
+                maxPrice: { $max: "$variants.price" },
+            },
+        },
+        {
+            $addFields: {
+                priceRange: {
+                    $cond: {
+                        if: { $eq: ["$minPrice", "$maxPrice"] },
+                        then: "$minPrice",
+                        else: { min: "$minPrice", max: "$maxPrice" },
+                    },
+                },
+            },
+        },
+        {
+            $lookup: {
+                from: "subcategories",
+                localField: "subCategoryId",
+                foreignField: "_id",
+                as: "subCategoryId",
+            },
+        },
+        { $unwind: { path: "$subCategoryId", preserveNullAndEmptyArrays: true } },
+        { $limit: 20 },
+        {
+            $project: {
+                _id: 1,
+                title: 1,
+                slug: 1,
+                featuredImage: 1,
+                priceRange: 1,
+                subCategoryId: {
+                    _id: "$subCategoryId._id",
+                    title: "$subCategoryId.title",
+                    slug: "$subCategoryId.slug",
+                },
+            },
+        },
+    ];
+    const products = yield product_model_1.Product.aggregate(pipeline);
+    return products;
+});
 exports.ProductServices = {
     createProduct,
     getAllProducts,
     getProductsAdmin,
     getProductById,
+    getProductBySlug,
     updateProduct,
     deleteProduct,
+    getFeaturedProducts,
+    searchProducts,
 };

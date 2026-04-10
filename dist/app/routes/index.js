@@ -10,6 +10,7 @@ const config_routes_1 = require("../modules/Configuration/config.routes");
 const brand_route_1 = require("../modules/Brand/brand.route");
 const upload_route_1 = require("../modules/Upload/upload.route");
 const product_route_1 = require("../modules/Product/product.route");
+const badge_route_1 = require("../modules/Badge/badge.route");
 exports.router = (0, express_1.Router)();
 const moduleRoutes = [
     {
@@ -43,6 +44,10 @@ const moduleRoutes = [
     {
         path: "/products",
         route: product_route_1.ProductRoutes,
+    },
+    {
+        path: "/badges",
+        route: badge_route_1.BadgeRoutes,
     },
 ];
 moduleRoutes.forEach((route) => {

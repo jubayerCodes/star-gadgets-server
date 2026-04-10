@@ -1,5 +1,12 @@
 import { Schema, model } from "mongoose";
-import { IProduct, IProductAttribute, ISpecification, IVariant, ProductStatus } from "./product.interface";
+import {
+  IProduct,
+  IProductAttribute,
+  IProductBadge,
+  ISpecification,
+  IVariant,
+  ProductStatus,
+} from "./product.interface";
 
 const productAttributeSchema = new Schema<IProductAttribute>(
   {
@@ -81,6 +88,14 @@ const specificationSchema = new Schema<ISpecification>({
   },
 });
 
+const badgeSchema = new Schema<IProductBadge>(
+  {
+    title: { type: String, required: true },
+    value: { type: String },
+  },
+  { _id: false },
+);
+
 const productSchema = new Schema<IProduct>(
   {
     title: {
@@ -132,9 +147,18 @@ const productSchema = new Schema<IProduct>(
       type: Boolean,
       default: true,
     },
+    isFeatured: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
     // Top-level attributes are optional — a product may have no attribute groups
     attributes: {
       type: [productAttributeSchema],
+      default: [],
+    },
+    badges: {
+      type: [badgeSchema],
       default: [],
     },
     variants: {

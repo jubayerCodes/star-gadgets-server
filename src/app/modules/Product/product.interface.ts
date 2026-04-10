@@ -33,6 +33,11 @@ export interface IVariant {
   isActive?: boolean;
 }
 
+export interface IProductBadge {
+  title: string;
+  value?: string;
+}
+
 export interface ISpecification {
   heading: string;
   specifications: {
@@ -48,6 +53,7 @@ export interface IProductAdmin {
   featuredImage: string;
   productCode: string;
   isActive: boolean;
+  isFeatured: boolean;
   createdAt: Date;
   updatedAt: Date;
   priceRange: number | { min: number; max: number };
@@ -71,8 +77,9 @@ export interface IProduct {
   keyFeatures: string;
   specifications: ISpecification[];
   isActive?: boolean;
-  // Top-level attributes are optional — a product may have no attribute groups
+  isFeatured: boolean;
   attributes?: IProductAttribute[];
+  badges?: IProductBadge[];
   variants: IVariant[];
   description: string;
   createdAt?: Date;

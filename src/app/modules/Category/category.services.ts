@@ -26,7 +26,7 @@ const updateCategory = async (id: string, payload: Partial<ICategory>) => {
     throw new AppError(httpStatus.BAD_REQUEST, "Category not found");
   }
 
-  const category = await Category.findByIdAndUpdate(id, payload, { new: true });
+  const category = await Category.findByIdAndUpdate(id, payload, { returnDocument: "after" });
 
   return category;
 };

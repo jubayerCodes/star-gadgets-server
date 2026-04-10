@@ -32,7 +32,7 @@ const updateCategory = (id, payload) => __awaiter(void 0, void 0, void 0, functi
     if (!isCategoryExist) {
         throw new AppError_1.default(http_status_codes_1.default.BAD_REQUEST, "Category not found");
     }
-    const category = yield category_model_1.Category.findByIdAndUpdate(id, payload, { new: true });
+    const category = yield category_model_1.Category.findByIdAndUpdate(id, payload, { returnDocument: "after" });
     return category;
 });
 const deleteCategory = (id) => __awaiter(void 0, void 0, void 0, function* () {

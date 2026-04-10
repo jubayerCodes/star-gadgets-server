@@ -15,11 +15,7 @@ SubCategoryRoutes.post(
   SubCategoryControllers.createSubCategory,
 );
 
-SubCategoryRoutes.patch(
-  "/:id",
-  validateRequest(updateSubCategoryZodSchema),
-  SubCategoryControllers.updateSubCategory,
-);
+SubCategoryRoutes.patch("/:id", validateRequest(updateSubCategoryZodSchema), SubCategoryControllers.updateSubCategory);
 
 SubCategoryRoutes.get("/admin", checkAuth(Role.ADMIN), SubCategoryControllers.getSubCategoriesAdmin);
 

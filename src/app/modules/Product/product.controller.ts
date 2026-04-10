@@ -49,6 +49,20 @@ const getProductById = catchAsync(async (req: Request, res: Response, next: Next
 });
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
+const getProductBySlug = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const slug = req.params.slug as string;
+
+  const product = await ProductServices.getProductBySlug(slug);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Product fetched successfully",
+    data: product,
+  });
+});
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const updateProduct = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const id = req.params.id as string;
   const payload: Partial<IProduct> = {
@@ -92,11 +106,39 @@ const getProductsAdmin = catchAsync(async (req: Request, res: Response, next: Ne
   });
 });
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const getFeaturedProducts = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const products = await ProductServices.getFeaturedProducts();
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Featured products fetched successfully",
+    data: products,
+  });
+});
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const searchProducts = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const query = req.query.q as string;
+  const products = query ? await ProductServices.searchProducts(query) : [];
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Products searched successfully",
+    data: products,
+  });
+});
+
 export const ProductControllers = {
   createProduct,
   getAllProducts,
   getProductsAdmin,
   getProductById,
+  getProductBySlug,
   updateProduct,
   deleteProduct,
+  getFeaturedProducts,
+  searchProducts,
 };

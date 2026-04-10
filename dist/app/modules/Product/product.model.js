@@ -76,6 +76,10 @@ const specificationSchema = new mongoose_1.Schema({
         required: true,
     },
 });
+const badgeSchema = new mongoose_1.Schema({
+    title: { type: String, required: true },
+    value: { type: String },
+}, { _id: false });
 const productSchema = new mongoose_1.Schema({
     title: {
         type: String,
@@ -126,8 +130,17 @@ const productSchema = new mongoose_1.Schema({
         type: Boolean,
         default: true,
     },
+    isFeatured: {
+        type: Boolean,
+        required: true,
+        default: false,
+    },
     attributes: {
         type: [productAttributeSchema],
+        default: [],
+    },
+    badges: {
+        type: [badgeSchema],
         default: [],
     },
     variants: {

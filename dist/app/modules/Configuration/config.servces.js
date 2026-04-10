@@ -23,7 +23,7 @@ const updateHeaderConfig = (id, payload) => __awaiter(void 0, void 0, void 0, fu
     }
     const updatedConfig = yield config_model_1.Config.findByIdAndUpdate(id, {
         header: payload === null || payload === void 0 ? void 0 : payload.header,
-    }, { new: true });
+    }, { returnDocument: "after" });
     return updatedConfig;
 });
 const updateHeroConfig = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
@@ -42,7 +42,7 @@ const updateHeroConfig = (id, payload) => __awaiter(void 0, void 0, void 0, func
     if (((_c = payload.hero) === null || _c === void 0 ? void 0 : _c.carouselContent) !== undefined) {
         updateData["hero.carouselContent"] = payload.hero.carouselContent;
     }
-    const updatedConfig = yield config_model_1.Config.findByIdAndUpdate(id, { $set: updateData }, { new: true });
+    const updatedConfig = yield config_model_1.Config.findByIdAndUpdate(id, { $set: updateData }, { returnDocument: "after" });
     return updatedConfig;
 });
 const getConfig = () => __awaiter(void 0, void 0, void 0, function* () {

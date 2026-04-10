@@ -1,0 +1,14 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.BadgeRoutes = void 0;
+const express_1 = require("express");
+const checkAuth_1 = require("../../middlewares/checkAuth");
+const validateRequest_1 = require("../../middlewares/validateRequest");
+const user_interface_1 = require("../User/user.interface");
+const badge_controller_1 = require("./badge.controller");
+const badge_validation_1 = require("./badge.validation");
+exports.BadgeRoutes = (0, express_1.Router)();
+exports.BadgeRoutes.post("/", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN), (0, validateRequest_1.validateRequest)(badge_validation_1.createBadgeZodSchema), badge_controller_1.BadgeController.createBadge);
+exports.BadgeRoutes.patch("/:id", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN), (0, validateRequest_1.validateRequest)(badge_validation_1.updateBadgeZodSchema), badge_controller_1.BadgeController.updateBadge);
+exports.BadgeRoutes.delete("/:id", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN), badge_controller_1.BadgeController.deleteBadge);
+exports.BadgeRoutes.get("/", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN), badge_controller_1.BadgeController.getAllBadges);

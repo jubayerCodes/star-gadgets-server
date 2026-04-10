@@ -8,18 +8,9 @@ import { Role } from "../User/user.interface";
 
 export const BrandRoutes = Router();
 
-BrandRoutes.post(
-  "/",
-  checkAuth(Role.ADMIN),
-  validateRequest(createBrandZodSchema),
-  BrandController.createBrand,
-);
+BrandRoutes.post("/", checkAuth(Role.ADMIN), validateRequest(createBrandZodSchema), BrandController.createBrand);
 
-BrandRoutes.patch(
-  "/:id",
-  validateRequest(updateBrandZodSchema),
-  BrandController.updateBrand,
-);
+BrandRoutes.patch("/:id", validateRequest(updateBrandZodSchema), BrandController.updateBrand);
 
 BrandRoutes.delete("/:id", checkAuth(Role.ADMIN), BrandController.deleteBrand);
 

@@ -27,7 +27,7 @@ const updateSubCategory = async (id: string, payload: Partial<ISubCategory>) => 
   }
 
   const subCategory = await SubCategory.findByIdAndUpdate(id, payload, {
-    new: true,
+    returnDocument: "after",
   });
 
   return subCategory;

@@ -25,7 +25,7 @@ const updateBrand = async (id: string, payload: Partial<IBrand>) => {
     throw new AppError(httpStatus.BAD_REQUEST, "Brand not found");
   }
 
-  const brand = await Brand.findByIdAndUpdate(id, payload, { new: true });
+  const brand = await Brand.findByIdAndUpdate(id, payload, { returnDocument: "after" });
 
   return brand;
 };
@@ -55,7 +55,10 @@ const getBrandsAdmin = async (query: Record<string, string>) => {
     filter.featured = query.featured === "true";
   }
 
-  const brands = await Brand.find(filter).sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 }).skip(skip).limit(limit);
+  const brands = await Brand.find(filter)
+    .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 })
+    .skip(skip)
+    .limit(limit);
 
   const total = await Brand.countDocuments(filter);
 

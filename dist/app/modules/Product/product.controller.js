@@ -47,6 +47,16 @@ const getProductById = (0, catchAsync_1.catchAsync)((req, res, next) => __awaite
         data: product,
     });
 }));
+const getProductBySlug = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const slug = req.params.slug;
+    const product = yield product_service_1.ProductServices.getProductBySlug(slug);
+    (0, sendResponse_1.sendResponse)(res, {
+        statusCode: http_status_codes_1.default.OK,
+        success: true,
+        message: "Product fetched successfully",
+        data: product,
+    });
+}));
 const updateProduct = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const id = req.params.id;
     const payload = Object.assign({}, req.body);
@@ -78,11 +88,33 @@ const getProductsAdmin = (0, catchAsync_1.catchAsync)((req, res, next) => __awai
         meta,
     });
 }));
+const getFeaturedProducts = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const products = yield product_service_1.ProductServices.getFeaturedProducts();
+    (0, sendResponse_1.sendResponse)(res, {
+        statusCode: http_status_codes_1.default.OK,
+        success: true,
+        message: "Featured products fetched successfully",
+        data: products,
+    });
+}));
+const searchProducts = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const query = req.query.q;
+    const products = query ? yield product_service_1.ProductServices.searchProducts(query) : [];
+    (0, sendResponse_1.sendResponse)(res, {
+        statusCode: http_status_codes_1.default.OK,
+        success: true,
+        message: "Products searched successfully",
+        data: products,
+    });
+}));
 exports.ProductControllers = {
     createProduct,
     getAllProducts,
     getProductsAdmin,
     getProductById,
+    getProductBySlug,
     updateProduct,
     deleteProduct,
+    getFeaturedProducts,
+    searchProducts,
 };

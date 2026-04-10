@@ -11,6 +11,10 @@ const productAttributeZodSchema = zod_1.z.object({
     })
         .min(1, "At least one attribute value is required"),
 });
+const productBadgeZodSchema = zod_1.z.object({
+    title: zod_1.z.string({ error: "Badge title is required" }),
+    value: zod_1.z.string().optional(),
+});
 const variantAttributeZodSchema = zod_1.z.object({
     name: zod_1.z.string(),
     value: zod_1.z.string(),
@@ -66,7 +70,9 @@ exports.createProductZodSchema = zod_1.z.object({
     description: zod_1.z.string({ error: "Description is required" }),
     isActive: zod_1.z.boolean().default(true),
     isDeleted: zod_1.z.boolean().default(false),
+    isFeatured: zod_1.z.boolean({ error: "isFeatured property is required" }),
     attributes: zod_1.z.array(productAttributeZodSchema).optional().default([]),
+    badges: zod_1.z.array(productBadgeZodSchema).optional().default([]),
     variants: zod_1.z.array(variantZodSchema).min(1, "At least one variant is required"),
 });
 exports.updateProductZodSchema = zod_1.z.object({
@@ -90,9 +96,8 @@ exports.updateProductZodSchema = zod_1.z.object({
     description: zod_1.z.string({ error: "Description is required" }).optional(),
     isActive: zod_1.z.boolean().optional(),
     isDeleted: zod_1.z.boolean().optional(),
+    isFeatured: zod_1.z.boolean().optional(),
     attributes: zod_1.z.array(productAttributeZodSchema).optional(),
-    variants: zod_1.z
-        .array(variantZodSchema)
-        .min(1, "At least one variant is required")
-        .optional(),
+    badges: zod_1.z.array(productBadgeZodSchema).optional(),
+    variants: zod_1.z.array(variantZodSchema).min(1, "At least one variant is required").optional(),
 });
