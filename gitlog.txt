@@ -1,0 +1,29 @@
+commit 7b7726b602d2a606c48215cfbceddd502d3955a1
+Author: JubayerCodes <jubayerhossain111220@gmail.com>
+Date:   Sat Apr 11 10:20:11 2026 +0600
+
+    added client domain in cors
+
+commit b058372cdf4a91bc5a0d8a5b2f83fcb1f050b330
+Author: JubayerCodes <jubayerhossain111220@gmail.com>
+Date:   Sat Apr 11 10:15:39 2026 +0600
+
+    added client domain in cors
+
+commit dfb457f9009cb4950db9c38248d48cd79788a1a6
+Author: JubayerCodes <jubayerhossain111220@gmail.com>
+Date:   Fri Apr 10 20:45:47 2026 +0600
+
+    added routes
+
+commit bb1daa0f32a89113e0e4061941d055a2936c0604
+Author: JubayerCodes <jubayerhossain111220@gmail.com>
+Date:   Fri Apr 10 20:24:07 2026 +0600
+
+    added routes
+
+commit 2405ef76df8ee233e8d7b9ad855ebd104557cc51
+Author: JubayerCodes <jubayerhossain111220@gmail.com>
+Date:   Fri Apr 10 19:50:49 2026 +0600
+
+    added routes
