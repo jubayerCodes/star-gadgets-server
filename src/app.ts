@@ -13,7 +13,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(
   cors({
-    origin: ["http://localhost:8000", "https://star-gadgets.vercel.app"],
+    origin: ["http://localhost:8000", "https://star-gadgets-client.vercel.app"],
     credentials: true,
   }),
 );
