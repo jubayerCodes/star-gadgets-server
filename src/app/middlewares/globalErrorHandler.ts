@@ -45,8 +45,8 @@ export const globalErrorHandler = (err: any, req: Request, res: Response, next: 
     status: statusCode,
     success: false,
     message,
-    errorSources: envVars?.NODE_ENV === "development" ? errorSources : null,
-    err: envVars?.NODE_ENV === "development" ? err : null,
-    stack: envVars?.NODE_ENV === "development" ? err?.stack : null,
+    errorSources: envVars?.NODE_ENV === "DEVELOPMENT" ? errorSources : null,
+    err: envVars?.NODE_ENV === "DEVELOPMENT" ? err : null,
+    stack: envVars?.NODE_ENV === "DEVELOPMENT" ? err?.stack : null,
   });
 };

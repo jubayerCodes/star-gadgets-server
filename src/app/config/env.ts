@@ -5,6 +5,7 @@ dotenv.config();
 interface EnvConfig {
   PORT: string;
   DB_URL: string;
+  CLIENT_URL: string;
   NODE_ENV: string;
   JWT_SECRET: string;
   JWT_EXPIRES_IN: string;
@@ -22,6 +23,7 @@ const loadEnvVariables = (): EnvConfig => {
   const reqEnvVariables: string[] = [
     "PORT",
     "DB_URL",
+    "CLIENT_URL",
     "NODE_ENV",
     "JWT_SECRET",
     "JWT_EXPIRES_IN",
@@ -42,6 +44,7 @@ const loadEnvVariables = (): EnvConfig => {
   return {
     PORT: process.env.PORT as string,
     DB_URL: process.env.DB_URL as string,
+    CLIENT_URL: process.env.CLIENT_URL as string,
     NODE_ENV: process.env.NODE_ENV as string,
     JWT_SECRET: process.env.JWT_SECRET as string,
     JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN as string,
