@@ -10,6 +10,7 @@ const loadEnvVariables = () => {
     const reqEnvVariables = [
         "PORT",
         "DB_URL",
+        "CLIENT_URL",
         "NODE_ENV",
         "JWT_SECRET",
         "JWT_EXPIRES_IN",
@@ -28,6 +29,7 @@ const loadEnvVariables = () => {
     return {
         PORT: process.env.PORT,
         DB_URL: process.env.DB_URL,
+        CLIENT_URL: process.env.CLIENT_URL,
         NODE_ENV: process.env.NODE_ENV,
         JWT_SECRET: process.env.JWT_SECRET,
         JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN,

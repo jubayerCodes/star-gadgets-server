@@ -50,9 +50,9 @@ const globalErrorHandler = (err, req, res, next) => {
         status: statusCode,
         success: false,
         message,
-        errorSources: (env_1.envVars === null || env_1.envVars === void 0 ? void 0 : env_1.envVars.NODE_ENV) === "development" ? errorSources : null,
-        err: (env_1.envVars === null || env_1.envVars === void 0 ? void 0 : env_1.envVars.NODE_ENV) === "development" ? err : null,
-        stack: (env_1.envVars === null || env_1.envVars === void 0 ? void 0 : env_1.envVars.NODE_ENV) === "development" ? err === null || err === void 0 ? void 0 : err.stack : null,
+        errorSources: (env_1.envVars === null || env_1.envVars === void 0 ? void 0 : env_1.envVars.NODE_ENV) === "DEVELOPMENT" ? errorSources : null,
+        err: (env_1.envVars === null || env_1.envVars === void 0 ? void 0 : env_1.envVars.NODE_ENV) === "DEVELOPMENT" ? err : null,
+        stack: (env_1.envVars === null || env_1.envVars === void 0 ? void 0 : env_1.envVars.NODE_ENV) === "DEVELOPMENT" ? err === null || err === void 0 ? void 0 : err.stack : null,
     });
 };
 exports.globalErrorHandler = globalErrorHandler;
