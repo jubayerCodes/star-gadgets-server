@@ -12,7 +12,7 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: [envVars.CLIENT_URL, "http://localhost:8000"],
+    origin: ["https://star-gadgets-client.onrender.com"],
     credentials: true,
   }),
 );
