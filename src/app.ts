@@ -10,18 +10,12 @@ const app = express();
 
 app.use(cookieParser());
 
-// app.use(
-//   cors({
-//     origin: ["https://star-gadgets-client.onrender.com"],
-//     credentials: true,
-//   }),
-// );
-
-const allowedOrigins = [
-  "https://star-gadgets-client.vercel.app",
-  "https://star-gadgets-client.onrender.com",
-  "http://localhost:8000",
-];
+app.use(
+  cors({
+    origin: ["https://star-gadgets-client.onrender.com"],
+    credentials: true,
+  }),
+);
 
 app.use(
   cors({
