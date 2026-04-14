@@ -120,14 +120,26 @@ const getFeaturedProducts = catchAsync(async (req: Request, res: Response, next:
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const searchProducts = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  const query = req.query.q as string;
-  const products = query ? await ProductServices.searchProducts(query) : [];
+  const query = (req.query.query || req.query.q) as string;
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 20;
+  const minPrice = req.query.minPrice ? parseFloat(req.query.minPrice as string) : undefined;
+  const maxPrice = req.query.maxPrice ? parseFloat(req.query.maxPrice as string) : undefined;
+  const availability = req.query.availability as "inStock" | "outOfStock" | undefined;
+  const brandSlug = req.query.brand as string | undefined;
+  const sortBy = req.query.sortBy as "relevance" | "priceAsc" | "priceDesc" | "newest" | undefined;
+
+  const emptyResult = { products: [], meta: { page, limit, skip: 0, total: 0 }, brands: [] };
+  const result = query
+    ? await ProductServices.searchProducts(query, { page, limit, minPrice, maxPrice, availability, brandSlug, sortBy })
+    : emptyResult;
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
     message: "Products searched successfully",
-    data: products,
+    data: { products: result.products, brands: result.brands },
+    meta: result.meta,
   });
 });
 

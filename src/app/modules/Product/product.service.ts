@@ -229,6 +229,8 @@ const getFeaturedProducts = async () => {
     { $sort: { createdAt: -1 } },
     { $lookup: { from: "categories", localField: "categoryId", foreignField: "_id", as: "categoryId" } },
     { $unwind: { path: "$categoryId", preserveNullAndEmptyArrays: false } },
+    { $lookup: { from: "subcategories", localField: "subCategoryId", foreignField: "_id", as: "subCategoryId" } },
+    { $unwind: { path: "$subCategoryId", preserveNullAndEmptyArrays: false } },
     { $lookup: { from: "brands", localField: "brandId", foreignField: "_id", as: "brandId" } },
     { $unwind: { path: "$brandId", preserveNullAndEmptyArrays: false } },
     {
@@ -238,6 +240,7 @@ const getFeaturedProducts = async () => {
         slug: 1,
         badges: 1,
         category: { _id: "$categoryId._id", title: "$categoryId.title", slug: "$categoryId.slug" },
+        subCategory: { _id: "$subCategoryId._id", title: "$subCategoryId.title", slug: "$subCategoryId.slug" },
         brand: { _id: "$brandId._id", title: "$brandId.title", slug: "$brandId.slug" },
         featuredVariant: {
           $let: {
@@ -267,25 +270,49 @@ const getFeaturedProducts = async () => {
   return products;
 };
 
-const searchProducts = async (query: string) => {
-  // Build a fuzzy regex: split on whitespace and allow each token to match
-  // loosely — each character may be followed by .* so small typos / missing
-  // letters are still caught. All tokens must appear (lookahead AND chain).
-  const tokens = query
+interface SearchProductsOptions {
+  page?: number;
+  limit?: number;
+  minPrice?: number;
+  maxPrice?: number;
+  availability?: "inStock" | "outOfStock";
+  brandSlug?: string;
+  sortBy?: "relevance" | "priceAsc" | "priceDesc" | "newest";
+}
+
+const searchProducts = async (searchQuery: string, options: SearchProductsOptions = {}) => {
+  const { page = 1, limit = 20, minPrice, maxPrice, availability, brandSlug, sortBy = "relevance" } = options;
+  const skip = (page - 1) * limit;
+
+  // Build a fuzzy regex
+  const tokens = searchQuery
     .trim()
     .split(/\s+/)
     .filter(Boolean)
-    .map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")); // escape special chars
+    .map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
 
-  // Each token becomes a fuzzy pattern: letters joined by \w*? (e.g. "iphne" → i\w*?p\w*?h\w*?n\w*?e)
   const fuzzyPattern = (token: string) => token.split("").join("\\w*?");
-
-  // Combine tokens as AND lookaheads on the full string
-  const combinedPattern = tokens.length > 0 ? tokens.map((t) => `(?=.*${fuzzyPattern(t)})`).join("") : query;
-
+  const combinedPattern = tokens.length > 0 ? tokens.map((t) => `(?=.*${fuzzyPattern(t)})`).join("") : searchQuery;
   const regex = new RegExp(combinedPattern, "i");
 
-  const pipeline: PipelineStage[] = [
+  // Sort stage based on sortBy param
+  const sortStageMap: Record<string, Record<string, 1 | -1>> = {
+    priceAsc: { minPrice: 1 },
+    priceDesc: { minPrice: -1 },
+    newest: { createdAt: -1 },
+    relevance: { createdAt: -1 },
+  };
+  const sortStage = sortStageMap[sortBy] ?? { createdAt: -1 };
+
+  // Availability filter mapped to variant statuses
+  const availabilityMatch: Record<string, unknown> = {};
+  if (availability === "inStock") {
+    availabilityMatch["stock"] = { $gt: 0 };
+  } else if (availability === "outOfStock") {
+    availabilityMatch["stock"] = { $lte: 0 };
+  }
+
+  const basePipeline: PipelineStage[] = [
     {
       $match: {
         isDeleted: false,
@@ -294,11 +321,12 @@ const searchProducts = async (query: string) => {
       },
     },
 
-    // Compute priceRange from variants
+    // Compute priceRange and stock from variants
     {
       $addFields: {
         minPrice: { $min: "$variants.price" },
         maxPrice: { $max: "$variants.price" },
+        stock: { $sum: "$variants.stock" },
       },
     },
     {
@@ -313,18 +341,33 @@ const searchProducts = async (query: string) => {
       },
     },
 
+    // Apply price filters if provided
+    ...(minPrice !== undefined || maxPrice !== undefined
+      ? [
+          {
+            $match: {
+              ...(minPrice !== undefined ? { minPrice: { $gte: minPrice } } : {}),
+              ...(maxPrice !== undefined ? { maxPrice: { $lte: maxPrice } } : {}),
+            } as Record<string, unknown>,
+          },
+        ]
+      : []),
+
+    // Apply availability filter
+    ...(Object.keys(availabilityMatch).length > 0 ? [{ $match: availabilityMatch as Record<string, unknown> }] : []),
+
+    // Populate brand
+    { $lookup: { from: "brands", localField: "brandId", foreignField: "_id", as: "brandId" } },
+    { $unwind: { path: "$brandId", preserveNullAndEmptyArrays: true } },
+
+    // Apply brand filter if provided
+    ...(brandSlug ? [{ $match: { "brandId.slug": brandSlug } as Record<string, unknown> }] : []),
+
     // Populate subCategory
-    {
-      $lookup: {
-        from: "subcategories",
-        localField: "subCategoryId",
-        foreignField: "_id",
-        as: "subCategoryId",
-      },
-    },
+    { $lookup: { from: "subcategories", localField: "subCategoryId", foreignField: "_id", as: "subCategoryId" } },
     { $unwind: { path: "$subCategoryId", preserveNullAndEmptyArrays: true } },
 
-    { $limit: 20 },
+    { $sort: sortStage as Record<string, 1 | -1> },
 
     {
       $project: {
@@ -332,18 +375,53 @@ const searchProducts = async (query: string) => {
         title: 1,
         slug: 1,
         featuredImage: 1,
+        badges: 1,
         priceRange: 1,
-        subCategoryId: {
-          _id: "$subCategoryId._id",
-          title: "$subCategoryId.title",
-          slug: "$subCategoryId.slug",
+        minPrice: 1,
+        stock: 1,
+        subCategoryId: { _id: "$subCategoryId._id", title: "$subCategoryId.title", slug: "$subCategoryId.slug" },
+        brandId: { _id: "$brandId._id", title: "$brandId.title", slug: "$brandId.slug" },
+        // Pick variant flagged as featured, else first variant
+        featuredVariant: {
+          $let: {
+            vars: {
+              featuredVals: {
+                $filter: { input: "$variants", as: "v", cond: { $eq: ["$$v.featured", true] } },
+              },
+            },
+            in: {
+              $cond: {
+                if: { $gt: [{ $size: "$$featuredVals" }, 0] },
+                then: { $arrayElemAt: ["$$featuredVals", 0] },
+                else: { $arrayElemAt: ["$variants", 0] },
+              },
+            },
+          },
         },
       },
     },
   ];
 
-  const products = await Product.aggregate(pipeline);
-  return products;
+  // Count total matching documents
+  const countPipeline = [...basePipeline, { $count: "total" }];
+  const countResult = await Product.aggregate(countPipeline);
+  const total = countResult[0]?.total ?? 0;
+
+  // Paginated results
+  const products = await Product.aggregate([...basePipeline, { $skip: skip }, { $limit: limit }]);
+
+  // Distinct brands from the full matched set (for sidebar filter)
+  const brandsPipeline: PipelineStage[] = [
+    ...basePipeline,
+    { $group: { _id: "$brandId._id", title: { $first: "$brandId.title" }, slug: { $first: "$brandId.slug" } } },
+    { $sort: { title: 1 } },
+    { $project: { _id: 1, title: 1, slug: 1 } },
+  ];
+  const brands = await Product.aggregate(brandsPipeline);
+
+  const meta: IMeta = { page, limit, skip, total };
+
+  return { products, meta, brands };
 };
 
 export const ProductServices = {

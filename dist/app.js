@@ -13,7 +13,7 @@ const env_1 = require("./app/config/env");
 const app = (0, express_1.default)();
 app.use((0, cookie_parser_1.default)());
 app.use((0, cors_1.default)({
-    origin: [env_1.envVars.CLIENT_URL, "http://localhost:8000"],
+    origin: ["http://localhost:8000", env_1.envVars.CLIENT_URL],
     credentials: true,
 }));
 app.use(express_1.default.json());

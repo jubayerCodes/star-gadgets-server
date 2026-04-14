@@ -98,13 +98,24 @@ const getFeaturedProducts = (0, catchAsync_1.catchAsync)((req, res, next) => __a
     });
 }));
 const searchProducts = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const query = req.query.q;
-    const products = query ? yield product_service_1.ProductServices.searchProducts(query) : [];
+    const query = (req.query.query || req.query.q);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const minPrice = req.query.minPrice ? parseFloat(req.query.minPrice) : undefined;
+    const maxPrice = req.query.maxPrice ? parseFloat(req.query.maxPrice) : undefined;
+    const availability = req.query.availability;
+    const brandSlug = req.query.brand;
+    const sortBy = req.query.sortBy;
+    const emptyResult = { products: [], meta: { page, limit, skip: 0, total: 0 }, brands: [] };
+    const result = query
+        ? yield product_service_1.ProductServices.searchProducts(query, { page, limit, minPrice, maxPrice, availability, brandSlug, sortBy })
+        : emptyResult;
     (0, sendResponse_1.sendResponse)(res, {
         statusCode: http_status_codes_1.default.OK,
         success: true,
         message: "Products searched successfully",
-        data: products,
+        data: { products: result.products, brands: result.brands },
+        meta: result.meta,
     });
 }));
 exports.ProductControllers = {
