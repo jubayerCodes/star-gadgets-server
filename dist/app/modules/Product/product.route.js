@@ -13,6 +13,7 @@ exports.ProductRoutes.patch("/:id", (0, checkAuth_1.checkAuth)(user_interface_1.
 exports.ProductRoutes.get("/admin", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN), product_controller_1.ProductControllers.getProductsAdmin);
 exports.ProductRoutes.get("/featured", product_controller_1.ProductControllers.getFeaturedProducts);
 exports.ProductRoutes.get("/search", product_controller_1.ProductControllers.searchProducts);
+exports.ProductRoutes.get("/listing", product_controller_1.ProductControllers.getPublicProducts);
 exports.ProductRoutes.get("/slug/:slug", product_controller_1.ProductControllers.getProductBySlug);
 exports.ProductRoutes.get("/:id", product_controller_1.ProductControllers.getProductById);
 exports.ProductRoutes.delete("/:id", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN), product_controller_1.ProductControllers.deleteProduct);

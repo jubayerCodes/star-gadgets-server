@@ -280,6 +280,19 @@ interface SearchProductsOptions {
   sortBy?: "relevance" | "priceAsc" | "priceDesc" | "newest";
 }
 
+interface GetPublicProductsOptions {
+  page?: number;
+  limit?: number;
+  search?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  availability?: "inStock" | "outOfStock";
+  brandSlug?: string;
+  categorySlug?: string;
+  subCategorySlug?: string;
+  sortBy?: "newest" | "priceAsc" | "priceDesc" | "popularity";
+}
+
 const searchProducts = async (searchQuery: string, options: SearchProductsOptions = {}) => {
   const { page = 1, limit = 20, minPrice, maxPrice, availability, brandSlug, sortBy = "relevance" } = options;
   const skip = (page - 1) * limit;
@@ -424,6 +437,182 @@ const searchProducts = async (searchQuery: string, options: SearchProductsOption
   return { products, meta, brands };
 };
 
+const getPublicProducts = async (options: GetPublicProductsOptions = {}) => {
+  const {
+    page = 1,
+    limit = 20,
+    search,
+    minPrice,
+    maxPrice,
+    availability,
+    brandSlug,
+    categorySlug,
+    subCategorySlug,
+    sortBy = "newest",
+  } = options;
+  const skip = (page - 1) * limit;
+
+  const matchStage: Record<string, unknown> = { isDeleted: false, isActive: true };
+
+  if (search && search.trim().length >= 2) {
+    const tokens = search
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+    const fuzzyPattern = (token: string) => token.split("").join("\\w*?");
+    const combinedPattern =
+      tokens.length > 0 ? tokens.map((t) => `(?=.*${fuzzyPattern(t)})`).join("") : search;
+    const regex = new RegExp(combinedPattern, "i");
+    matchStage.$or = [{ title: regex }, { slug: regex }, { productCode: regex }];
+  }
+
+  const sortStageMap: Record<string, Record<string, 1 | -1>> = {
+    priceAsc: { minPrice: 1 },
+    priceDesc: { minPrice: -1 },
+    newest: { createdAt: -1 },
+    popularity: { createdAt: -1 },
+  };
+  const sortStage = sortStageMap[sortBy] ?? { createdAt: -1 };
+
+  const availabilityMatch: Record<string, unknown> = {};
+  if (availability === "inStock") availabilityMatch["stock"] = { $gt: 0 };
+  else if (availability === "outOfStock") availabilityMatch["stock"] = { $lte: 0 };
+
+  const basePipeline: PipelineStage[] = [
+    { $match: matchStage },
+    {
+      $addFields: {
+        minPrice: { $min: "$variants.price" },
+        maxPrice: { $max: "$variants.price" },
+        stock: { $sum: "$variants.stock" },
+      },
+    },
+    {
+      $addFields: {
+        priceRange: {
+          $cond: {
+            if: { $eq: ["$minPrice", "$maxPrice"] },
+            then: "$minPrice",
+            else: { min: "$minPrice", max: "$maxPrice" },
+          },
+        },
+      },
+    },
+    ...(minPrice !== undefined || maxPrice !== undefined
+      ? [
+          {
+            $match: {
+              ...(minPrice !== undefined ? { minPrice: { $gte: minPrice } } : {}),
+              ...(maxPrice !== undefined ? { maxPrice: { $lte: maxPrice } } : {}),
+            } as Record<string, unknown>,
+          },
+        ]
+      : []),
+    ...(Object.keys(availabilityMatch).length > 0
+      ? [{ $match: availabilityMatch as Record<string, unknown> }]
+      : []),
+    // Brand lookup + optional filter
+    { $lookup: { from: "brands", localField: "brandId", foreignField: "_id", as: "brandId" } },
+    { $unwind: { path: "$brandId", preserveNullAndEmptyArrays: true } },
+    ...(brandSlug ? [{ $match: { "brandId.slug": brandSlug } as Record<string, unknown> }] : []),
+    // Category lookup + optional filter
+    { $lookup: { from: "categories", localField: "categoryId", foreignField: "_id", as: "categoryId" } },
+    { $unwind: { path: "$categoryId", preserveNullAndEmptyArrays: true } },
+    ...(categorySlug
+      ? [{ $match: { "categoryId.slug": categorySlug } as Record<string, unknown> }]
+      : []),
+    // SubCategory lookup + optional filter
+    {
+      $lookup: {
+        from: "subcategories",
+        localField: "subCategoryId",
+        foreignField: "_id",
+        as: "subCategoryId",
+      },
+    },
+    { $unwind: { path: "$subCategoryId", preserveNullAndEmptyArrays: true } },
+    ...(subCategorySlug
+      ? [{ $match: { "subCategoryId.slug": subCategorySlug } as Record<string, unknown> }]
+      : []),
+    { $sort: sortStage as Record<string, 1 | -1> },
+    {
+      $project: {
+        _id: 1,
+        title: 1,
+        slug: 1,
+        featuredImage: 1,
+        badges: 1,
+        priceRange: 1,
+        minPrice: 1,
+        stock: 1,
+        categoryId: { _id: "$categoryId._id", title: "$categoryId.title", slug: "$categoryId.slug" },
+        subCategoryId: {
+          _id: "$subCategoryId._id",
+          title: "$subCategoryId.title",
+          slug: "$subCategoryId.slug",
+        },
+        brandId: { _id: "$brandId._id", title: "$brandId.title", slug: "$brandId.slug" },
+        featuredVariant: {
+          $let: {
+            vars: {
+              featuredVals: {
+                $filter: { input: "$variants", as: "v", cond: { $eq: ["$$v.featured", true] } },
+              },
+            },
+            in: {
+              $cond: {
+                if: { $gt: [{ $size: "$$featuredVals" }, 0] },
+                then: { $arrayElemAt: ["$$featuredVals", 0] },
+                else: { $arrayElemAt: ["$variants", 0] },
+              },
+            },
+          },
+        },
+      },
+    },
+  ];
+
+  const countPipeline = [...basePipeline, { $count: "total" }];
+  const countResult = await Product.aggregate(countPipeline);
+  const total = countResult[0]?.total ?? 0;
+
+  const products = await Product.aggregate([...basePipeline, { $skip: skip }, { $limit: limit }]);
+
+  // Distinct brands for the sidebar (from full matched set)
+  const brandsPipeline: PipelineStage[] = [
+    ...basePipeline,
+    {
+      $group: {
+        _id: "$brandId._id",
+        title: { $first: "$brandId.title" },
+        slug: { $first: "$brandId.slug" },
+      },
+    },
+    { $sort: { title: 1 } },
+    { $project: { _id: 1, title: 1, slug: 1 } },
+  ];
+  const brands = await Product.aggregate(brandsPipeline);
+
+  // Distinct categories for the sidebar
+  const categoriesPipeline: PipelineStage[] = [
+    ...basePipeline,
+    {
+      $group: {
+        _id: "$categoryId._id",
+        title: { $first: "$categoryId.title" },
+        slug: { $first: "$categoryId.slug" },
+      },
+    },
+    { $sort: { title: 1 } },
+    { $project: { _id: 1, title: 1, slug: 1 } },
+  ];
+  const categories = await Product.aggregate(categoriesPipeline);
+
+  const meta: IMeta = { page, limit, skip, total };
+  return { products, meta, brands, categories };
+};
+
 export const ProductServices = {
   createProduct,
   getAllProducts,
@@ -434,4 +623,5 @@ export const ProductServices = {
   deleteProduct,
   getFeaturedProducts,
   searchProducts,
+  getPublicProducts,
 };

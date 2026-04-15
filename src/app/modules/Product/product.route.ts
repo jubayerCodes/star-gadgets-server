@@ -27,6 +27,8 @@ ProductRoutes.get("/featured", ProductControllers.getFeaturedProducts);
 
 ProductRoutes.get("/search", ProductControllers.searchProducts);
 
+ProductRoutes.get("/listing", ProductControllers.getPublicProducts);
+
 ProductRoutes.get("/slug/:slug", ProductControllers.getProductBySlug);
 
 ProductRoutes.get("/:id", ProductControllers.getProductById);

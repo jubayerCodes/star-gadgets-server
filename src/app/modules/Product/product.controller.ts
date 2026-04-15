@@ -143,6 +143,41 @@ const searchProducts = catchAsync(async (req: Request, res: Response, next: Next
   });
 });
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const getPublicProducts = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 20;
+  const search = req.query.search as string | undefined;
+  const minPrice = req.query.minPrice ? parseFloat(req.query.minPrice as string) : undefined;
+  const maxPrice = req.query.maxPrice ? parseFloat(req.query.maxPrice as string) : undefined;
+  const availability = req.query.availability as "inStock" | "outOfStock" | undefined;
+  const brandSlug = req.query.brand as string | undefined;
+  const categorySlug = req.query.category as string | undefined;
+  const subCategorySlug = req.query.subCategory as string | undefined;
+  const sortBy = req.query.sortBy as "newest" | "priceAsc" | "priceDesc" | "popularity" | undefined;
+
+  const result = await ProductServices.getPublicProducts({
+    page,
+    limit,
+    search,
+    minPrice,
+    maxPrice,
+    availability,
+    brandSlug,
+    categorySlug,
+    subCategorySlug,
+    sortBy,
+  });
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Products fetched successfully",
+    data: { products: result.products, brands: result.brands, categories: result.categories },
+    meta: result.meta,
+  });
+});
+
 export const ProductControllers = {
   createProduct,
   getAllProducts,
@@ -153,4 +188,5 @@ export const ProductControllers = {
   deleteProduct,
   getFeaturedProducts,
   searchProducts,
+  getPublicProducts,
 };
