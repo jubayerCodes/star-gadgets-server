@@ -118,6 +118,37 @@ const searchProducts = (0, catchAsync_1.catchAsync)((req, res, next) => __awaite
         meta: result.meta,
     });
 }));
+const getPublicProducts = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const search = req.query.search;
+    const minPrice = req.query.minPrice ? parseFloat(req.query.minPrice) : undefined;
+    const maxPrice = req.query.maxPrice ? parseFloat(req.query.maxPrice) : undefined;
+    const availability = req.query.availability;
+    const brandSlug = req.query.brand;
+    const categorySlug = req.query.category;
+    const subCategorySlug = req.query.subCategory;
+    const sortBy = req.query.sortBy;
+    const result = yield product_service_1.ProductServices.getPublicProducts({
+        page,
+        limit,
+        search,
+        minPrice,
+        maxPrice,
+        availability,
+        brandSlug,
+        categorySlug,
+        subCategorySlug,
+        sortBy,
+    });
+    (0, sendResponse_1.sendResponse)(res, {
+        statusCode: http_status_codes_1.default.OK,
+        success: true,
+        message: "Products fetched successfully",
+        data: { products: result.products, brands: result.brands, categories: result.categories },
+        meta: result.meta,
+    });
+}));
 exports.ProductControllers = {
     createProduct,
     getAllProducts,
@@ -128,4 +159,5 @@ exports.ProductControllers = {
     deleteProduct,
     getFeaturedProducts,
     searchProducts,
+    getPublicProducts,
 };

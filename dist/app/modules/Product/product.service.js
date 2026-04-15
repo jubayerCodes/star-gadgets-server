@@ -338,6 +338,154 @@ const searchProducts = (searchQuery_1, ...args_1) => __awaiter(void 0, [searchQu
     const meta = { page, limit, skip, total };
     return { products, meta, brands };
 });
+const getPublicProducts = (...args_1) => __awaiter(void 0, [...args_1], void 0, function* (options = {}) {
+    var _a, _b, _c;
+    const { page = 1, limit = 20, search, minPrice, maxPrice, availability, brandSlug, categorySlug, subCategorySlug, sortBy = "newest", } = options;
+    const skip = (page - 1) * limit;
+    const matchStage = { isDeleted: false, isActive: true };
+    if (search && search.trim().length >= 2) {
+        const tokens = search
+            .trim()
+            .split(/\s+/)
+            .filter(Boolean)
+            .map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+        const fuzzyPattern = (token) => token.split("").join("\\w*?");
+        const combinedPattern = tokens.length > 0 ? tokens.map((t) => `(?=.*${fuzzyPattern(t)})`).join("") : search;
+        const regex = new RegExp(combinedPattern, "i");
+        matchStage.$or = [{ title: regex }, { slug: regex }, { productCode: regex }];
+    }
+    const sortStageMap = {
+        priceAsc: { minPrice: 1 },
+        priceDesc: { minPrice: -1 },
+        newest: { createdAt: -1 },
+        popularity: { createdAt: -1 },
+    };
+    const sortStage = (_a = sortStageMap[sortBy]) !== null && _a !== void 0 ? _a : { createdAt: -1 };
+    const availabilityMatch = {};
+    if (availability === "inStock")
+        availabilityMatch["stock"] = { $gt: 0 };
+    else if (availability === "outOfStock")
+        availabilityMatch["stock"] = { $lte: 0 };
+    const basePipeline = [
+        { $match: matchStage },
+        {
+            $addFields: {
+                minPrice: { $min: "$variants.price" },
+                maxPrice: { $max: "$variants.price" },
+                stock: { $sum: "$variants.stock" },
+            },
+        },
+        {
+            $addFields: {
+                priceRange: {
+                    $cond: {
+                        if: { $eq: ["$minPrice", "$maxPrice"] },
+                        then: "$minPrice",
+                        else: { min: "$minPrice", max: "$maxPrice" },
+                    },
+                },
+            },
+        },
+        ...(minPrice !== undefined || maxPrice !== undefined
+            ? [
+                {
+                    $match: Object.assign(Object.assign({}, (minPrice !== undefined ? { minPrice: { $gte: minPrice } } : {})), (maxPrice !== undefined ? { maxPrice: { $lte: maxPrice } } : {})),
+                },
+            ]
+            : []),
+        ...(Object.keys(availabilityMatch).length > 0
+            ? [{ $match: availabilityMatch }]
+            : []),
+        { $lookup: { from: "brands", localField: "brandId", foreignField: "_id", as: "brandId" } },
+        { $unwind: { path: "$brandId", preserveNullAndEmptyArrays: true } },
+        ...(brandSlug ? [{ $match: { "brandId.slug": brandSlug } }] : []),
+        { $lookup: { from: "categories", localField: "categoryId", foreignField: "_id", as: "categoryId" } },
+        { $unwind: { path: "$categoryId", preserveNullAndEmptyArrays: true } },
+        ...(categorySlug
+            ? [{ $match: { "categoryId.slug": categorySlug } }]
+            : []),
+        {
+            $lookup: {
+                from: "subcategories",
+                localField: "subCategoryId",
+                foreignField: "_id",
+                as: "subCategoryId",
+            },
+        },
+        { $unwind: { path: "$subCategoryId", preserveNullAndEmptyArrays: true } },
+        ...(subCategorySlug
+            ? [{ $match: { "subCategoryId.slug": subCategorySlug } }]
+            : []),
+        { $sort: sortStage },
+        {
+            $project: {
+                _id: 1,
+                title: 1,
+                slug: 1,
+                featuredImage: 1,
+                badges: 1,
+                priceRange: 1,
+                minPrice: 1,
+                stock: 1,
+                categoryId: { _id: "$categoryId._id", title: "$categoryId.title", slug: "$categoryId.slug" },
+                subCategoryId: {
+                    _id: "$subCategoryId._id",
+                    title: "$subCategoryId.title",
+                    slug: "$subCategoryId.slug",
+                },
+                brandId: { _id: "$brandId._id", title: "$brandId.title", slug: "$brandId.slug" },
+                featuredVariant: {
+                    $let: {
+                        vars: {
+                            featuredVals: {
+                                $filter: { input: "$variants", as: "v", cond: { $eq: ["$$v.featured", true] } },
+                            },
+                        },
+                        in: {
+                            $cond: {
+                                if: { $gt: [{ $size: "$$featuredVals" }, 0] },
+                                then: { $arrayElemAt: ["$$featuredVals", 0] },
+                                else: { $arrayElemAt: ["$variants", 0] },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    ];
+    const countPipeline = [...basePipeline, { $count: "total" }];
+    const countResult = yield product_model_1.Product.aggregate(countPipeline);
+    const total = (_c = (_b = countResult[0]) === null || _b === void 0 ? void 0 : _b.total) !== null && _c !== void 0 ? _c : 0;
+    const products = yield product_model_1.Product.aggregate([...basePipeline, { $skip: skip }, { $limit: limit }]);
+    const brandsPipeline = [
+        ...basePipeline,
+        {
+            $group: {
+                _id: "$brandId._id",
+                title: { $first: "$brandId.title" },
+                slug: { $first: "$brandId.slug" },
+            },
+        },
+        { $sort: { title: 1 } },
+        { $project: { _id: 1, title: 1, slug: 1 } },
+    ];
+    const brands = yield product_model_1.Product.aggregate(brandsPipeline);
+    const categoriesPipeline = [
+        ...basePipeline,
+        {
+            $group: {
+                _id: "$categoryId._id",
+                title: { $first: "$categoryId.title" },
+                slug: { $first: "$categoryId.slug" },
+            },
+        },
+        { $sort: { title: 1 } },
+        { $project: { _id: 1, title: 1, slug: 1 } },
+    ];
+    const categories = yield product_model_1.Product.aggregate(categoriesPipeline);
+    const meta = { page, limit, skip, total };
+    return { products, meta, brands, categories };
+});
 exports.ProductServices = {
     createProduct,
     getAllProducts,
@@ -348,4 +496,5 @@ exports.ProductServices = {
     deleteProduct,
     getFeaturedProducts,
     searchProducts,
+    getPublicProducts,
 };
