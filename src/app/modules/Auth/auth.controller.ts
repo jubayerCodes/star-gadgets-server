@@ -43,16 +43,15 @@ const getNewAccessToken = catchAsync(async (req: Request, res: Response, next: N
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logout = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  res.clearCookie("accessToken", {
+  const isProduction = process.env.NODE_ENV === "PRODUCTION";
+  const clearOptions = {
     httpOnly: true,
-    secure: false,
-    sameSite: "lax",
-  });
-  res.clearCookie("refreshToken", {
-    httpOnly: true,
-    secure: false,
-    sameSite: "lax",
-  });
+    secure: isProduction,
+    sameSite: (isProduction ? "none" : "lax") as "none" | "lax",
+  };
+
+  res.clearCookie("accessToken", clearOptions);
+  res.clearCookie("refreshToken", clearOptions);
 
   sendResponse(res, {
     success: true,
