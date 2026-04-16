@@ -6,21 +6,25 @@ export interface AuthTokens {
   refreshToken?: string;
 }
 
+const isProduction = envVars.NODE_ENV === "PRODUCTION";
+
 export const setAuthCookie = (res: Response, tokenInfo: AuthTokens) => {
+  const cookieOptions = {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: (isProduction ? "none" : "lax") as "none" | "lax",
+  };
+
   if (tokenInfo.accessToken) {
     res.cookie("accessToken", tokenInfo.accessToken, {
-      httpOnly: true,
-      secure: envVars.NODE_ENV === "PRODUCTION",
-      sameSite: "none",
+      ...cookieOptions,
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
   }
 
   if (tokenInfo.refreshToken) {
     res.cookie("refreshToken", tokenInfo.refreshToken, {
-      httpOnly: true,
-      secure: envVars.NODE_ENV === "PRODUCTION",
-      sameSite: "none",
+      ...cookieOptions,
       maxAge: 30 * 24 * 60 * 60 * 1000,
     });
   }
