@@ -65,9 +65,37 @@ const getSubCategoriesList = catchAsync(async (req: Request, res: Response, next
   });
 });
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const getSubCategoryBySlug = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const slug = req.params.slug as string;
+  const subCategory = await SubCategoryServices.getSubCategoryBySlug(slug);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Sub-category fetched successfully",
+    data: subCategory,
+  });
+});
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const getSubCategoryProductFilters = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const slug = req.params.slug as string;
+  const result = await SubCategoryServices.getSubCategoryProductFilters(slug);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Sub-category filters fetched successfully",
+    data: result,
+  });
+});
+
 export const SubCategoryControllers = {
   createSubCategory,
   updateSubCategory,
   getSubCategoriesAdmin,
   getSubCategoriesList,
+  getSubCategoryBySlug,
+  getSubCategoryProductFilters,
 };

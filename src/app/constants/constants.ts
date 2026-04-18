@@ -1,4 +1,13 @@
-export const DEFAULT_LIMIT = 10;
-export const DEFAULT_PAGE = 1;
-export const DEFAULT_SORT_BY = "createdAt";
-export const DEFAULT_SORT_ORDER = "desc";
+export const PRODUCT_LISTING = {
+  DEFAULT_LIMIT: 20,
+  DEFAULT_PAGE: 1,
+  DEFAULT_SORT_BY: "createdAt",
+  DEFAULT_SORT_ORDER: "desc",
+};
+
+export const PRODUCT_LISTING_ADMIN = {
+  DEFAULT_LIMIT: 10,
+  DEFAULT_PAGE: 1,
+  DEFAULT_SORT_BY: "createdAt",
+  DEFAULT_SORT_ORDER: "desc",
+};

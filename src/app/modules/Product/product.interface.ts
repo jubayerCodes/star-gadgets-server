@@ -85,3 +85,40 @@ export interface IProduct {
   createdAt?: Date;
   updatedAt?: Date;
 }
+
+
+export interface SearchProductsOptions {
+  page?: number;
+  limit?: number;
+  minPrice?: number;
+  maxPrice?: number;
+  availability?: "inStock" | "outOfStock";
+  brandSlug?: string;
+  subCategorySlug?: string;
+  sortBy?: "relevance" | "priceAsc" | "priceDesc" | "newest";
+}
+
+export interface GetPublicProductsOptions {
+  page?: number;
+  limit?: number;
+  search?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  availability?: "inStock" | "outOfStock";
+  brandSlug?: string;
+  categorySlug?: string;
+  subCategorySlug?: string;
+  sortBy?: "newest" | "priceAsc" | "priceDesc" | "popularity";
+}
+
+export interface GetProductsByCategoryOptions {
+  page?: number;
+  limit?: number;
+  search?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  availability?: "inStock" | "outOfStock";
+  brandSlug?: string;
+  subCategorySlug?: string;
+  sortBy?: "newest" | "priceAsc" | "priceDesc" | "popularity";
+}

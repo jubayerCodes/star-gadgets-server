@@ -20,3 +20,7 @@ SubCategoryRoutes.patch("/:id", validateRequest(updateSubCategoryZodSchema), Sub
 SubCategoryRoutes.get("/admin", checkAuth(Role.ADMIN), SubCategoryControllers.getSubCategoriesAdmin);
 
 SubCategoryRoutes.get("/list", SubCategoryControllers.getSubCategoriesList);
+
+SubCategoryRoutes.get("/:slug/filters", SubCategoryControllers.getSubCategoryProductFilters);
+
+SubCategoryRoutes.get("/:slug", SubCategoryControllers.getSubCategoryBySlug);
