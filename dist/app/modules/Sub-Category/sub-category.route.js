@@ -12,3 +12,5 @@ exports.SubCategoryRoutes.post("/", (0, checkAuth_1.checkAuth)(user_interface_1.
 exports.SubCategoryRoutes.patch("/:id", (0, validateRequest_1.validateRequest)(sub_category_validation_1.updateSubCategoryZodSchema), sub_category_controller_1.SubCategoryControllers.updateSubCategory);
 exports.SubCategoryRoutes.get("/admin", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN), sub_category_controller_1.SubCategoryControllers.getSubCategoriesAdmin);
 exports.SubCategoryRoutes.get("/list", sub_category_controller_1.SubCategoryControllers.getSubCategoriesList);
+exports.SubCategoryRoutes.get("/:slug/filters", sub_category_controller_1.SubCategoryControllers.getSubCategoryProductFilters);
+exports.SubCategoryRoutes.get("/:slug", sub_category_controller_1.SubCategoryControllers.getSubCategoryBySlug);

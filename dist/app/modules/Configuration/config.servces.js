@@ -45,6 +45,16 @@ const updateHeroConfig = (id, payload) => __awaiter(void 0, void 0, void 0, func
     const updatedConfig = yield config_model_1.Config.findByIdAndUpdate(id, { $set: updateData }, { returnDocument: "after" });
     return updatedConfig;
 });
+const updateShippingConfig = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const isConfigExist = yield config_model_1.Config.findById(id);
+    if (!isConfigExist) {
+        throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "Config not found");
+    }
+    const updatedConfig = yield config_model_1.Config.findByIdAndUpdate(id, {
+        shippingMethods: payload.shippingMethods,
+    }, { returnDocument: "after" });
+    return updatedConfig;
+});
 const getConfig = () => __awaiter(void 0, void 0, void 0, function* () {
     const config = yield config_model_1.Config.aggregate([
         {
@@ -128,5 +138,6 @@ const getConfig = () => __awaiter(void 0, void 0, void 0, function* () {
 exports.ConfigServices = {
     updateHeaderConfig,
     updateHeroConfig,
+    updateShippingConfig,
     getConfig,
 };

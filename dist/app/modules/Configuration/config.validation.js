@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateConfigValidation = exports.updateHeroConfigValidation = exports.updateHeaderConfigValidation = void 0;
+exports.updateShippingConfigValidation = exports.updateConfigValidation = exports.updateHeroConfigValidation = exports.updateHeaderConfigValidation = void 0;
 const zod_1 = require("zod");
 const heroFixedItemSchema = zod_1.z.object({
     id: zod_1.z.string(),
@@ -31,11 +31,21 @@ exports.updateConfigValidation = zod_1.z.object({
         navLinks: zod_1.z.array(zod_1.z.string()),
     })
         .optional(),
-    hero: zod_1.z
-        .object({
+    hero: zod_1.z.object({
         heroType: zod_1.z.enum(["fixed", "carousel"]).optional(),
         fixedContent: zod_1.z.array(heroFixedItemSchema).max(3).optional(),
         carouselContent: zod_1.z.array(heroCarouselItemSchema).optional(),
-    })
+    }).optional(),
+    shippingMethods: zod_1.z
+        .array(zod_1.z.object({
+        name: zod_1.z.string(),
+        cost: zod_1.z.number(),
+    }))
         .optional(),
+});
+exports.updateShippingConfigValidation = zod_1.z.object({
+    shippingMethods: zod_1.z.array(zod_1.z.object({
+        name: zod_1.z.string(),
+        cost: zod_1.z.number(),
+    })),
 });

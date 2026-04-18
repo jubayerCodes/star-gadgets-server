@@ -33,6 +33,16 @@ const updateHeroConfig = (0, catchAsync_1.catchAsync)((req, res, next) => __awai
         data: updatedConfig,
     });
 }));
+const updateShippingConfig = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const id = req.params.id;
+    const updatedConfig = yield config_servces_1.ConfigServices.updateShippingConfig(id, req.body);
+    (0, sendResponse_1.sendResponse)(res, {
+        statusCode: 200,
+        success: true,
+        message: "Shipping config updated successfully",
+        data: updatedConfig,
+    });
+}));
 const getConfig = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const config = yield config_servces_1.ConfigServices.getConfig();
     (0, sendResponse_1.sendResponse)(res, {
@@ -45,5 +55,6 @@ const getConfig = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(voi
 exports.ConfigController = {
     updateHeaderConfig,
     updateHeroConfig,
+    updateShippingConfig,
     getConfig,
 };

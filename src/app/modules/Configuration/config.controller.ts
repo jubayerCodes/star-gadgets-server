@@ -32,6 +32,20 @@ const updateHeroConfig = catchAsync(async (req: Request, res: Response, next: Ne
 });
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
+const updateShippingConfig = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const id = req.params.id as string;
+
+  const updatedConfig = await ConfigServices.updateShippingConfig(id, req.body);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Shipping config updated successfully",
+    data: updatedConfig,
+  });
+});
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getConfig = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const config = await ConfigServices.getConfig();
 
@@ -46,5 +60,6 @@ const getConfig = catchAsync(async (req: Request, res: Response, next: NextFunct
 export const ConfigController = {
   updateHeaderConfig,
   updateHeroConfig,
+  updateShippingConfig,
   getConfig,
 };

@@ -43,6 +43,18 @@ const configSchema = new Schema<IConfig>(
         default: [],
       },
     },
+    shippingMethods: {
+      type: [
+        {
+          name: { type: String, required: true },
+          cost: { type: Number, required: true },
+        },
+      ],
+      default: [
+        { name: "Inside Dhaka", cost: 60 },
+        { name: "Outside Dhaka", cost: 120 },
+      ],
+    },
   },
   { timestamps: true, versionKey: false },
 );
