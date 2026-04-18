@@ -8,10 +8,10 @@ const getSkip = (page, limit) => {
 };
 exports.getSkip = getSkip;
 const extractSearchQuery = (query) => {
-    const { page, limit, sortBy = constants_1.DEFAULT_SORT_BY, sortOrder = constants_1.DEFAULT_SORT_ORDER, search = "" } = query;
-    const skip = (0, exports.getSkip)(parseInt(page) || constants_1.DEFAULT_PAGE, parseInt(limit) || constants_1.DEFAULT_LIMIT);
-    const pageNumber = parseInt(page) || constants_1.DEFAULT_PAGE;
-    const limitNumber = parseInt(limit) || constants_1.DEFAULT_LIMIT;
+    const { page, limit, sortBy = constants_1.PRODUCT_LISTING_ADMIN.DEFAULT_SORT_BY, sortOrder = constants_1.PRODUCT_LISTING_ADMIN.DEFAULT_SORT_ORDER, search = "", } = query;
+    const skip = (0, exports.getSkip)(parseInt(page) || constants_1.PRODUCT_LISTING_ADMIN.DEFAULT_PAGE, parseInt(limit) || constants_1.PRODUCT_LISTING_ADMIN.DEFAULT_LIMIT);
+    const pageNumber = parseInt(page) || constants_1.PRODUCT_LISTING_ADMIN.DEFAULT_PAGE;
+    const limitNumber = parseInt(limit) || constants_1.PRODUCT_LISTING_ADMIN.DEFAULT_LIMIT;
     return {
         page: pageNumber,
         limit: limitNumber,

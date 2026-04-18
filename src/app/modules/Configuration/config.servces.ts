@@ -44,6 +44,24 @@ const updateHeroConfig = async (id: string, payload: Partial<IConfig>) => {
   return updatedConfig;
 };
 
+const updateShippingConfig = async (id: string, payload: Pick<IConfig, "shippingMethods">) => {
+  const isConfigExist = await Config.findById(id);
+
+  if (!isConfigExist) {
+    throw new AppError(httpStatus.NOT_FOUND, "Config not found");
+  }
+
+  const updatedConfig = await Config.findByIdAndUpdate(
+    id,
+    {
+      shippingMethods: payload.shippingMethods,
+    },
+    { returnDocument: "after" }
+  );
+
+  return updatedConfig;
+};
+
 const getConfig = async () => {
   const config = await Config.aggregate([
     // Step 1: Save the original ordered IDs before $lookup overwrites the field
@@ -134,5 +152,6 @@ const getConfig = async () => {
 export const ConfigServices = {
   updateHeaderConfig,
   updateHeroConfig,
+  updateShippingConfig,
   getConfig,
 };

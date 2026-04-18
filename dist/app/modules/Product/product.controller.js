@@ -17,6 +17,7 @@ const catchAsync_1 = require("../../utils/catchAsync");
 const sendResponse_1 = require("../../utils/sendResponse");
 const http_status_codes_1 = __importDefault(require("http-status-codes"));
 const product_service_1 = require("./product.service");
+const constants_1 = require("../../constants/constants");
 const createProduct = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const payload = Object.assign({}, req.body);
     const product = yield product_service_1.ProductServices.createProduct(payload);
@@ -99,28 +100,39 @@ const getFeaturedProducts = (0, catchAsync_1.catchAsync)((req, res, next) => __a
 }));
 const searchProducts = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const query = (req.query.query || req.query.q);
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 20;
+    const page = parseInt(req.query.page) || constants_1.PRODUCT_LISTING.DEFAULT_PAGE;
+    const limit = parseInt(req.query.limit) || constants_1.PRODUCT_LISTING.DEFAULT_LIMIT;
     const minPrice = req.query.minPrice ? parseFloat(req.query.minPrice) : undefined;
     const maxPrice = req.query.maxPrice ? parseFloat(req.query.maxPrice) : undefined;
     const availability = req.query.availability;
     const brandSlug = req.query.brand;
+    const subCategorySlug = req.query.subCategory;
     const sortBy = req.query.sortBy;
-    const emptyResult = { products: [], meta: { page, limit, skip: 0, total: 0 }, brands: [] };
+    const emptyResult = { products: [], meta: { page, limit, skip: 0, total: 0 } };
     const result = query
-        ? yield product_service_1.ProductServices.searchProducts(query, { page, limit, minPrice, maxPrice, availability, brandSlug, sortBy })
+        ? yield product_service_1.ProductServices.searchProducts(query, { page, limit, minPrice, maxPrice, availability, brandSlug, subCategorySlug, sortBy })
         : emptyResult;
     (0, sendResponse_1.sendResponse)(res, {
         statusCode: http_status_codes_1.default.OK,
         success: true,
         message: "Products searched successfully",
-        data: { products: result.products, brands: result.brands },
+        data: { products: result.products },
         meta: result.meta,
     });
 }));
+const getSearchFilters = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const query = (req.query.query || req.query.q);
+    const result = query ? yield product_service_1.ProductServices.getSearchFilters(query) : { brands: [], subCategories: [] };
+    (0, sendResponse_1.sendResponse)(res, {
+        statusCode: http_status_codes_1.default.OK,
+        success: true,
+        message: "Search filters fetched successfully",
+        data: result,
+    });
+}));
 const getPublicProducts = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 20;
+    const page = parseInt(req.query.page) || constants_1.PRODUCT_LISTING.DEFAULT_PAGE;
+    const limit = parseInt(req.query.limit) || constants_1.PRODUCT_LISTING.DEFAULT_LIMIT;
     const search = req.query.search;
     const minPrice = req.query.minPrice ? parseFloat(req.query.minPrice) : undefined;
     const maxPrice = req.query.maxPrice ? parseFloat(req.query.maxPrice) : undefined;
@@ -145,7 +157,80 @@ const getPublicProducts = (0, catchAsync_1.catchAsync)((req, res, next) => __awa
         statusCode: http_status_codes_1.default.OK,
         success: true,
         message: "Products fetched successfully",
-        data: { products: result.products, brands: result.brands, categories: result.categories },
+        data: { products: result.products },
+        meta: result.meta,
+    });
+}));
+const getListingFilters = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield product_service_1.ProductServices.getListingFilters();
+    (0, sendResponse_1.sendResponse)(res, {
+        statusCode: http_status_codes_1.default.OK,
+        success: true,
+        message: "Listing filters fetched successfully",
+        data: result,
+    });
+}));
+const getProductsByCategory = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const categorySlug = req.params.slug;
+    const page = parseInt(req.query.page) || constants_1.PRODUCT_LISTING.DEFAULT_PAGE;
+    const limit = parseInt(req.query.limit) || constants_1.PRODUCT_LISTING.DEFAULT_LIMIT;
+    const search = req.query.search;
+    const minPrice = req.query.minPrice ? parseFloat(req.query.minPrice) : undefined;
+    const maxPrice = req.query.maxPrice ? parseFloat(req.query.maxPrice) : undefined;
+    const availability = req.query.availability;
+    const brandSlug = req.query.brand;
+    const subCategorySlug = req.query.subCategory;
+    const sortBy = req.query.sortBy;
+    const result = yield product_service_1.ProductServices.getProductsByCategory(categorySlug, {
+        page,
+        limit,
+        search,
+        minPrice,
+        maxPrice,
+        availability,
+        brandSlug,
+        subCategorySlug,
+        sortBy,
+    });
+    (0, sendResponse_1.sendResponse)(res, {
+        statusCode: http_status_codes_1.default.OK,
+        success: true,
+        message: "Products fetched successfully",
+        data: {
+            category: result.category,
+            products: result.products,
+        },
+        meta: result.meta,
+    });
+}));
+const getCategoryFilters = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const categorySlug = req.params.slug;
+    const result = yield product_service_1.ProductServices.getCategoryFilters(categorySlug);
+    (0, sendResponse_1.sendResponse)(res, {
+        statusCode: http_status_codes_1.default.OK,
+        success: true,
+        message: "Category filters fetched successfully",
+        data: result,
+    });
+}));
+const getSubCategoryProducts = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const subCategorySlug = req.params.slug;
+    const page = parseInt(req.query.page) || constants_1.PRODUCT_LISTING.DEFAULT_PAGE;
+    const limit = parseInt(req.query.limit) || constants_1.PRODUCT_LISTING.DEFAULT_LIMIT;
+    const search = req.query.search;
+    const minPrice = req.query.minPrice ? parseFloat(req.query.minPrice) : undefined;
+    const maxPrice = req.query.maxPrice ? parseFloat(req.query.maxPrice) : undefined;
+    const availability = req.query.availability;
+    const brandSlug = req.query.brand;
+    const sortBy = req.query.sortBy;
+    const result = yield product_service_1.ProductServices.getProductsBySubCategory(subCategorySlug, {
+        page, limit, search, minPrice, maxPrice, availability, brandSlug, sortBy,
+    });
+    (0, sendResponse_1.sendResponse)(res, {
+        statusCode: http_status_codes_1.default.OK,
+        success: true,
+        message: "Products fetched successfully",
+        data: { subCategory: result.subCategory, products: result.products },
         meta: result.meta,
     });
 }));
@@ -159,5 +244,10 @@ exports.ProductControllers = {
     deleteProduct,
     getFeaturedProducts,
     searchProducts,
+    getSearchFilters,
     getPublicProducts,
+    getListingFilters,
+    getProductsByCategory,
+    getCategoryFilters,
+    getSubCategoryProducts,
 };

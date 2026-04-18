@@ -8,6 +8,7 @@ import { BrandRoutes } from "../modules/Brand/brand.route";
 import { UploadRoutes } from "../modules/Upload/upload.route";
 import { ProductRoutes } from "../modules/Product/product.route";
 import { BadgeRoutes } from "../modules/Badge/badge.route";
+import { CouponRoutes } from "../modules/Coupon/coupon.routes";
 
 export const router = Router();
 
@@ -50,6 +51,10 @@ const moduleRoutes: {
   {
     path: "/badges",
     route: BadgeRoutes,
+  },
+  {
+    path: "/coupons",
+    route: CouponRoutes,
   },
 ];
 

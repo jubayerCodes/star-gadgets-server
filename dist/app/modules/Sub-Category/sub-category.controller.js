@@ -58,9 +58,31 @@ const getSubCategoriesList = (0, catchAsync_1.catchAsync)((req, res, next) => __
         meta,
     });
 }));
+const getSubCategoryBySlug = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const slug = req.params.slug;
+    const subCategory = yield sub_category_services_1.SubCategoryServices.getSubCategoryBySlug(slug);
+    (0, sendResponse_1.sendResponse)(res, {
+        statusCode: http_status_codes_1.default.OK,
+        success: true,
+        message: "Sub-category fetched successfully",
+        data: subCategory,
+    });
+}));
+const getSubCategoryProductFilters = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const slug = req.params.slug;
+    const result = yield sub_category_services_1.SubCategoryServices.getSubCategoryProductFilters(slug);
+    (0, sendResponse_1.sendResponse)(res, {
+        statusCode: http_status_codes_1.default.OK,
+        success: true,
+        message: "Sub-category filters fetched successfully",
+        data: result,
+    });
+}));
 exports.SubCategoryControllers = {
     createSubCategory,
     updateSubCategory,
     getSubCategoriesAdmin,
     getSubCategoriesList,
+    getSubCategoryBySlug,
+    getSubCategoryProductFilters,
 };

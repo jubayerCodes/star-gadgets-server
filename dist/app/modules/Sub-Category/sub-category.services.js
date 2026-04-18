@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.SubCategoryServices = void 0;
 const sub_category_model_1 = require("./sub-category.model");
 const category_model_1 = require("../Category/category.model");
+const product_model_1 = require("../Product/product.model");
 const http_status_codes_1 = __importDefault(require("http-status-codes"));
 const AppError_1 = __importDefault(require("../../errorHelpers/AppError"));
 const extractSearchQuery_1 = require("../../utils/extractSearchQuery");
@@ -93,9 +94,42 @@ const getSubCategoriesList = (query) => __awaiter(void 0, void 0, void 0, functi
     };
     return { subCategories, meta };
 });
+const getSubCategoryBySlug = (slug) => __awaiter(void 0, void 0, void 0, function* () {
+    const subCategory = yield sub_category_model_1.SubCategory.findOne({ slug })
+        .populate("categoryId", "_id title slug image")
+        .lean();
+    if (!subCategory) {
+        throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "Sub-category not found");
+    }
+    return subCategory;
+});
+const getSubCategoryProductFilters = (subCategorySlug) => __awaiter(void 0, void 0, void 0, function* () {
+    const subCategory = yield sub_category_model_1.SubCategory.findOne({ slug: subCategorySlug }).lean();
+    if (!subCategory) {
+        throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "Sub-category not found");
+    }
+    const brandsPipeline = [
+        { $match: { isDeleted: false, isActive: true, subCategoryId: subCategory._id } },
+        { $lookup: { from: "brands", localField: "brandId", foreignField: "_id", as: "brandId" } },
+        { $unwind: { path: "$brandId", preserveNullAndEmptyArrays: false } },
+        {
+            $group: {
+                _id: "$brandId._id",
+                title: { $first: "$brandId.title" },
+                slug: { $first: "$brandId.slug" },
+            },
+        },
+        { $sort: { title: 1 } },
+        { $project: { _id: 1, title: 1, slug: 1 } },
+    ];
+    const brands = yield product_model_1.Product.aggregate(brandsPipeline);
+    return { brands };
+});
 exports.SubCategoryServices = {
     createSubCategory,
     updateSubCategory,
     getSubCategoriesAdmin,
     getSubCategoriesList,
+    getSubCategoryBySlug,
+    getSubCategoryProductFilters,
 };
