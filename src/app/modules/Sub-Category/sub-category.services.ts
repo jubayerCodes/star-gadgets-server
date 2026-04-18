@@ -1,11 +1,13 @@
 import { SubCategory } from "./sub-category.model";
 import { Category } from "../Category/category.model";
+import { Product } from "../Product/product.model";
 import httpStatus from "http-status-codes";
 import { ISubCategory } from "./sub-category.interface";
 import AppError from "../../errorHelpers/AppError";
 import { IMeta } from "../../utils/sendResponse";
 import { extractSearchQuery } from "../../utils/extractSearchQuery";
 import { getSearchQuery } from "../../utils/getSearchQuery";
+import { PipelineStage } from "mongoose";
 
 const createSubCategory = async (payload: ISubCategory) => {
   const isSubCategoryExist = await SubCategory.findOne({ slug: payload.slug });
@@ -103,9 +105,48 @@ const getSubCategoriesList = async (query: Record<string, string>) => {
   return { subCategories, meta };
 };
 
+const getSubCategoryBySlug = async (slug: string) => {
+  const subCategory = await SubCategory.findOne({ slug })
+    .populate("categoryId", "_id title slug image")
+    .lean();
+
+  if (!subCategory) {
+    throw new AppError(httpStatus.NOT_FOUND, "Sub-category not found");
+  }
+
+  return subCategory;
+};
+
+const getSubCategoryProductFilters = async (subCategorySlug: string) => {
+  const subCategory = await SubCategory.findOne({ slug: subCategorySlug }).lean();
+  if (!subCategory) {
+    throw new AppError(httpStatus.NOT_FOUND, "Sub-category not found");
+  }
+
+  const brandsPipeline: PipelineStage[] = [
+    { $match: { isDeleted: false, isActive: true, subCategoryId: subCategory._id } },
+    { $lookup: { from: "brands", localField: "brandId", foreignField: "_id", as: "brandId" } },
+    { $unwind: { path: "$brandId", preserveNullAndEmptyArrays: false } },
+    {
+      $group: {
+        _id: "$brandId._id",
+        title: { $first: "$brandId.title" },
+        slug: { $first: "$brandId.slug" },
+      },
+    },
+    { $sort: { title: 1 } },
+    { $project: { _id: 1, title: 1, slug: 1 } },
+  ];
+
+  const brands = await Product.aggregate(brandsPipeline);
+  return { brands };
+};
+
 export const SubCategoryServices = {
   createSubCategory,
   updateSubCategory,
   getSubCategoriesAdmin,
   getSubCategoriesList,
+  getSubCategoryBySlug,
+  getSubCategoryProductFilters,
 };

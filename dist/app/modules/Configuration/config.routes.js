@@ -10,4 +10,5 @@ const user_interface_1 = require("../User/user.interface");
 exports.ConfigRoutes = (0, express_1.Router)();
 exports.ConfigRoutes.patch("/header/:id", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN, user_interface_1.Role.SUPER_ADMIN), (0, validateRequest_1.validateRequest)(config_validation_1.updateHeaderConfigValidation), config_controller_1.ConfigController.updateHeaderConfig);
 exports.ConfigRoutes.patch("/hero/:id", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN, user_interface_1.Role.SUPER_ADMIN), (0, validateRequest_1.validateRequest)(config_validation_1.updateHeroConfigValidation), config_controller_1.ConfigController.updateHeroConfig);
+exports.ConfigRoutes.patch("/shipping/:id", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN, user_interface_1.Role.SUPER_ADMIN), (0, validateRequest_1.validateRequest)(config_validation_1.updateShippingConfigValidation), config_controller_1.ConfigController.updateShippingConfig);
 exports.ConfigRoutes.get("/", config_controller_1.ConfigController.getConfig);

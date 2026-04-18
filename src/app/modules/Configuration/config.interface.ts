@@ -28,6 +28,10 @@ export interface IConfig {
     fixedContent: IHeroFixedItem[];
     carouselContent: IHeroCarouselItem[];
   };
+  shippingMethods: {
+    name: string;
+    cost: number;
+  }[];
 }
 
 export interface IConfigResponse {
@@ -38,6 +42,10 @@ export interface IConfigResponse {
     fixedContent: IHeroFixedItem[];
     carouselContent: IHeroCarouselItem[];
   };
+  shippingMethods: {
+    name: string;
+    cost: number;
+  }[];
 }
 
 export interface IHeaderConfigResponse {

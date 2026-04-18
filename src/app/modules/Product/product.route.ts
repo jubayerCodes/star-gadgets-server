@@ -25,9 +25,16 @@ ProductRoutes.get("/admin", checkAuth(Role.ADMIN), ProductControllers.getProduct
 
 ProductRoutes.get("/featured", ProductControllers.getFeaturedProducts);
 
+ProductRoutes.get("/search/filters", ProductControllers.getSearchFilters);
 ProductRoutes.get("/search", ProductControllers.searchProducts);
 
+ProductRoutes.get("/listing/filters", ProductControllers.getListingFilters);
 ProductRoutes.get("/listing", ProductControllers.getPublicProducts);
+
+ProductRoutes.get("/category/:slug/filters", ProductControllers.getCategoryFilters);
+ProductRoutes.get("/category/:slug", ProductControllers.getProductsByCategory);
+
+ProductRoutes.get("/sub-category/:slug", ProductControllers.getSubCategoryProducts);
 
 ProductRoutes.get("/slug/:slug", ProductControllers.getProductBySlug);
 

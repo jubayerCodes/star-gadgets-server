@@ -34,5 +34,17 @@ const configSchema = new mongoose_1.Schema({
             default: [],
         },
     },
+    shippingMethods: {
+        type: [
+            {
+                name: { type: String, required: true },
+                cost: { type: Number, required: true },
+            },
+        ],
+        default: [
+            { name: "Inside Dhaka", cost: 60 },
+            { name: "Outside Dhaka", cost: 120 },
+        ],
+    },
 }, { timestamps: true, versionKey: false });
 exports.Config = (0, mongoose_1.model)("Config", configSchema);
