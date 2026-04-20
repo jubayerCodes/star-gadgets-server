@@ -359,7 +359,13 @@ const getSearchFilters = (searchQuery) => __awaiter(void 0, void 0, void 0, func
         },
         { $lookup: { from: "subcategories", localField: "subCategoryId", foreignField: "_id", as: "subCategoryId" } },
         { $unwind: { path: "$subCategoryId", preserveNullAndEmptyArrays: true } },
-        { $group: { _id: "$subCategoryId._id", title: { $first: "$subCategoryId.title" }, slug: { $first: "$subCategoryId.slug" } } },
+        {
+            $group: {
+                _id: "$subCategoryId._id",
+                title: { $first: "$subCategoryId.title" },
+                slug: { $first: "$subCategoryId.slug" },
+            },
+        },
         { $sort: { title: 1 } },
         { $project: { _id: 1, title: 1, slug: 1 } },
     ];

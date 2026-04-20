@@ -149,10 +149,7 @@ const getMyOrders = (userEmail, query) => __awaiter(void 0, void 0, void 0, func
     const user = yield user_model_1.User.findOne({ email: userEmail }).select("_id");
     if (!user)
         throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "User not found");
-    const pipeline = [
-        { $match: { userId: user._id } },
-        { $sort: { createdAt: -1 } },
-    ];
+    const pipeline = [{ $match: { userId: user._id } }, { $sort: { createdAt: -1 } }];
     const countResult = yield order_model_1.Order.aggregate([...pipeline, { $count: "total" }]);
     const total = (_b = (_a = countResult[0]) === null || _a === void 0 ? void 0 : _a.total) !== null && _b !== void 0 ? _b : 0;
     const orders = yield order_model_1.Order.aggregate([...pipeline, { $skip: skip }, { $limit: limit }]);
@@ -176,6 +173,9 @@ const updateOrderStatus = (id, orderStatus) => __awaiter(void 0, void 0, void 0,
     const order = yield order_model_1.Order.findById(id);
     if (!order) {
         throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "Order not found");
+    }
+    if (order.orderStatus === order_interface_1.OrderStatus.CANCELLED) {
+        throw new AppError_1.default(http_status_codes_1.default.CONFLICT, "This order has been cancelled and can no longer be modified.");
     }
     if (orderStatus === order_interface_1.OrderStatus.CANCELLED && order.orderStatus === order_interface_1.OrderStatus.CONFIRMED) {
         for (const item of order.items) {
