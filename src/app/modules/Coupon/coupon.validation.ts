@@ -17,3 +17,5 @@ export const validateCouponValidation = z.object({
   subtotal: z.number().positive(),
   userId: z.string().optional(),
 });
+
+export const updateCouponValidation = createCouponValidation.partial();

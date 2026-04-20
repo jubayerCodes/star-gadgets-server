@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { CouponController } from "./coupon.controller";
 import { validateRequest } from "../../middlewares/validateRequest";
-import { createCouponValidation, validateCouponValidation } from "./coupon.validation";
+import { createCouponValidation, updateCouponValidation, validateCouponValidation } from "./coupon.validation";
 import { checkAuth } from "../../middlewares/checkAuth";
 import { Role } from "../User/user.interface";
 
@@ -24,6 +24,13 @@ CouponRoutes.post(
   "/validate",
   validateRequest(validateCouponValidation),
   CouponController.validateCoupon
+);
+
+CouponRoutes.patch(
+  "/:id",
+  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
+  validateRequest(updateCouponValidation),
+  CouponController.updateCoupon
 );
 
 CouponRoutes.delete(
