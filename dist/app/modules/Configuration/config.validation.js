@@ -31,11 +31,13 @@ exports.updateConfigValidation = zod_1.z.object({
         navLinks: zod_1.z.array(zod_1.z.string()),
     })
         .optional(),
-    hero: zod_1.z.object({
+    hero: zod_1.z
+        .object({
         heroType: zod_1.z.enum(["fixed", "carousel"]).optional(),
         fixedContent: zod_1.z.array(heroFixedItemSchema).max(3).optional(),
         carouselContent: zod_1.z.array(heroCarouselItemSchema).optional(),
-    }).optional(),
+    })
+        .optional(),
     shippingMethods: zod_1.z
         .array(zod_1.z.object({
         name: zod_1.z.string(),

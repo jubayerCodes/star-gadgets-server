@@ -110,7 +110,16 @@ const searchProducts = (0, catchAsync_1.catchAsync)((req, res, next) => __awaite
     const sortBy = req.query.sortBy;
     const emptyResult = { products: [], meta: { page, limit, skip: 0, total: 0 } };
     const result = query
-        ? yield product_service_1.ProductServices.searchProducts(query, { page, limit, minPrice, maxPrice, availability, brandSlug, subCategorySlug, sortBy })
+        ? yield product_service_1.ProductServices.searchProducts(query, {
+            page,
+            limit,
+            minPrice,
+            maxPrice,
+            availability,
+            brandSlug,
+            subCategorySlug,
+            sortBy,
+        })
         : emptyResult;
     (0, sendResponse_1.sendResponse)(res, {
         statusCode: http_status_codes_1.default.OK,
@@ -224,7 +233,14 @@ const getSubCategoryProducts = (0, catchAsync_1.catchAsync)((req, res, next) => 
     const brandSlug = req.query.brand;
     const sortBy = req.query.sortBy;
     const result = yield product_service_1.ProductServices.getProductsBySubCategory(subCategorySlug, {
-        page, limit, search, minPrice, maxPrice, availability, brandSlug, sortBy,
+        page,
+        limit,
+        search,
+        minPrice,
+        maxPrice,
+        availability,
+        brandSlug,
+        sortBy,
     });
     (0, sendResponse_1.sendResponse)(res, {
         statusCode: http_status_codes_1.default.OK,
