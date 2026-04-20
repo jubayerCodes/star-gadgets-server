@@ -218,6 +218,15 @@ const updateOrderStatus = async (id: string, orderStatus: OrderStatus) => {
     throw new AppError(httpStatus.NOT_FOUND, "Order not found");
   }
 
+  // ── Freeze guard ─────────────────────────────────────────────────────────
+  // Once cancelled, an order is immutable — no further status changes allowed.
+  if (order.orderStatus === OrderStatus.CANCELLED) {
+    throw new AppError(
+      httpStatus.CONFLICT,
+      "This order has been cancelled and can no longer be modified.",
+    );
+  }
+
   // Restore stock if cancelling a confirmed order
   if (orderStatus === OrderStatus.CANCELLED && order.orderStatus === OrderStatus.CONFIRMED) {
     for (const item of order.items) {

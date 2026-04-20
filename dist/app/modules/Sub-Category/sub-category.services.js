@@ -95,9 +95,7 @@ const getSubCategoriesList = (query) => __awaiter(void 0, void 0, void 0, functi
     return { subCategories, meta };
 });
 const getSubCategoryBySlug = (slug) => __awaiter(void 0, void 0, void 0, function* () {
-    const subCategory = yield sub_category_model_1.SubCategory.findOne({ slug })
-        .populate("categoryId", "_id title slug image")
-        .lean();
+    const subCategory = yield sub_category_model_1.SubCategory.findOne({ slug }).populate("categoryId", "_id title slug image").lean();
     if (!subCategory) {
         throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "Sub-category not found");
     }
