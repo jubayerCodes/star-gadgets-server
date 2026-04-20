@@ -51,9 +51,20 @@ const deleteCoupon = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(
         data: null,
     });
 }));
+const updateCoupon = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const id = req.params.id;
+    const result = yield coupon_service_1.CouponServices.updateCoupon(id, req.body);
+    (0, sendResponse_1.sendResponse)(res, {
+        statusCode: 200,
+        success: true,
+        message: "Coupon updated successfully",
+        data: result,
+    });
+}));
 exports.CouponController = {
     createCoupon,
     getAllCoupons,
     validateCoupon,
     deleteCoupon,
+    updateCoupon,
 };

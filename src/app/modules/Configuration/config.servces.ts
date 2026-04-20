@@ -56,7 +56,7 @@ const updateShippingConfig = async (id: string, payload: Pick<IConfig, "shipping
     {
       shippingMethods: payload.shippingMethods,
     },
-    { returnDocument: "after" }
+    { returnDocument: "after" },
   );
 
   return updatedConfig;

@@ -106,9 +106,7 @@ const getSubCategoriesList = async (query: Record<string, string>) => {
 };
 
 const getSubCategoryBySlug = async (slug: string) => {
-  const subCategory = await SubCategory.findOne({ slug })
-    .populate("categoryId", "_id title slug image")
-    .lean();
+  const subCategory = await SubCategory.findOne({ slug }).populate("categoryId", "_id title slug image").lean();
 
   if (!subCategory) {
     throw new AppError(httpStatus.NOT_FOUND, "Sub-category not found");
