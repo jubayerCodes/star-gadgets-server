@@ -9,6 +9,7 @@ import { UploadRoutes } from "../modules/Upload/upload.route";
 import { ProductRoutes } from "../modules/Product/product.route";
 import { BadgeRoutes } from "../modules/Badge/badge.route";
 import { CouponRoutes } from "../modules/Coupon/coupon.routes";
+import { OrderRoutes } from "../modules/Order/order.routes";
 
 export const router = Router();
 
@@ -55,6 +56,10 @@ const moduleRoutes: {
   {
     path: "/coupons",
     route: CouponRoutes,
+  },
+  {
+    path: "/orders",
+    route: OrderRoutes,
   },
 ];
 

@@ -124,9 +124,21 @@ const deleteCoupon = async (id: string) => {
   return result;
 };
 
+const updateCoupon = async (id: string, payload: Partial<ICoupon>) => {
+  const result = await Coupon.findByIdAndUpdate(id, payload, {
+    new: true,
+    runValidators: true,
+  });
+  if (!result) {
+    throw new AppError(httpStatus.NOT_FOUND, "Coupon not found");
+  }
+  return result;
+};
+
 export const CouponServices = {
   createCoupon,
   getAllCoupons,
   validateCoupon,
   deleteCoupon,
+  updateCoupon,
 };
