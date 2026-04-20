@@ -14,7 +14,7 @@ const billingDetailsSchema = new Schema<IBillingDetails>(
     postcode: { type: String },
     phone: { type: String, required: true },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const orderItemSchema = new Schema<IOrderItem>(
@@ -28,7 +28,7 @@ const orderItemSchema = new Schema<IOrderItem>(
     price: { type: Number, required: true },
     subtotal: { type: Number, required: true },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const couponSnapshotSchema = new Schema<ICouponSnapshot>(
@@ -37,7 +37,7 @@ const couponSnapshotSchema = new Schema<ICouponSnapshot>(
     code: { type: String, required: true },
     discountAmount: { type: Number, required: true },
   },
-  { _id: false }
+  { _id: false },
 );
 
 // ── Counter for orderNumber ──────────────────────────────────────────────────
@@ -47,7 +47,7 @@ const orderCounterSchema = new Schema(
     _id: { type: String, required: true },
     seq: { type: Number, default: 0 },
   },
-  { versionKey: false }
+  { versionKey: false },
 );
 
 const OrderCounter = model("OrderCounter", orderCounterSchema);
@@ -57,11 +57,7 @@ const getNextOrderNumber = async (): Promise<string> => {
   const dateStr = today.toISOString().slice(0, 10).replace(/-/g, ""); // YYYYMMDD
   const counterId = `order-${dateStr}`;
 
-  const counter = await OrderCounter.findByIdAndUpdate(
-    counterId,
-    { $inc: { seq: 1 } },
-    { upsert: true, new: true }
-  );
+  const counter = await OrderCounter.findByIdAndUpdate(counterId, { $inc: { seq: 1 } }, { upsert: true, new: true });
 
   const seq = String(counter.seq).padStart(4, "0");
   return `SG-${dateStr}-${seq}`;
@@ -94,7 +90,7 @@ const orderSchema = new Schema<IOrder>(
     },
     orderNotes: { type: String },
   },
-  { timestamps: true, versionKey: false }
+  { timestamps: true, versionKey: false },
 );
 
 orderSchema.pre("save", async function () {

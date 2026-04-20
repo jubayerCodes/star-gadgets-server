@@ -36,10 +36,7 @@ const getAllOrders = catchAsync(async (req: Request, res: Response, next: NextFu
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getMyOrders = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const user = getUserFromReq(req);
-  const { orders, meta } = await OrderServices.getMyOrders(
-    user.email,
-    req.query as Record<string, string>
-  );
+  const { orders, meta } = await OrderServices.getMyOrders(user.email, req.query as Record<string, string>);
 
   sendResponse(res, {
     statusCode: 200,
@@ -54,11 +51,7 @@ const getMyOrders = catchAsync(async (req: Request, res: Response, next: NextFun
 const getOrderById = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const reqUser = (req as any).user;
-  const result = await OrderServices.getOrderById(
-    req.params.id as string,
-    reqUser?.email,
-    reqUser?.role
-  );
+  const result = await OrderServices.getOrderById(req.params.id as string, reqUser?.email, reqUser?.role);
 
   sendResponse(res, {
     statusCode: 200,
@@ -70,10 +63,7 @@ const getOrderById = catchAsync(async (req: Request, res: Response, next: NextFu
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const updateOrderStatus = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  const result = await OrderServices.updateOrderStatus(
-    req.params.id as string,
-    req.body.orderStatus as OrderStatus
-  );
+  const result = await OrderServices.updateOrderStatus(req.params.id as string, req.body.orderStatus as OrderStatus);
 
   sendResponse(res, {
     statusCode: 200,

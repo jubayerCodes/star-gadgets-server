@@ -14,7 +14,7 @@ const couponSchema = new Schema<ICoupon>(
     hasPerUserLimit: { type: Boolean, default: false },
     perUserUsageLimit: { type: Number, default: 1 },
   },
-  { timestamps: true, versionKey: false }
+  { timestamps: true, versionKey: false },
 );
 
 export const Coupon = model<ICoupon>("Coupon", couponSchema);

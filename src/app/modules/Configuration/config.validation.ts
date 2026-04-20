@@ -33,11 +33,13 @@ export const updateConfigValidation = z.object({
       navLinks: z.array(z.string()),
     })
     .optional(),
-  hero: z.object({
-    heroType: z.enum(["fixed", "carousel"]).optional(),
-    fixedContent: z.array(heroFixedItemSchema).max(3).optional(),
-    carouselContent: z.array(heroCarouselItemSchema).optional(),
-  }).optional(),
+  hero: z
+    .object({
+      heroType: z.enum(["fixed", "carousel"]).optional(),
+      fixedContent: z.array(heroFixedItemSchema).max(3).optional(),
+      carouselContent: z.array(heroCarouselItemSchema).optional(),
+    })
+    .optional(),
   shippingMethods: z
     .array(
       z.object({

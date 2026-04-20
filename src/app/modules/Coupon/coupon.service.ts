@@ -85,16 +85,13 @@ const validateCoupon = async (payload: { code: string; subtotal: number; userId?
     if (userUsageCount >= coupon.perUserUsageLimit) {
       throw new AppError(
         httpStatus.BAD_REQUEST,
-        `You have already used this coupon ${coupon.perUserUsageLimit} time(s). Further usage is not allowed.`
+        `You have already used this coupon ${coupon.perUserUsageLimit} time(s). Further usage is not allowed.`,
       );
     }
   }
 
   if (coupon.minOrderValue && payload.subtotal < coupon.minOrderValue) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      `Minimum order value to use this coupon is ৳${coupon.minOrderValue}`
-    );
+    throw new AppError(httpStatus.BAD_REQUEST, `Minimum order value to use this coupon is ৳${coupon.minOrderValue}`);
   }
 
   let discount = 0;

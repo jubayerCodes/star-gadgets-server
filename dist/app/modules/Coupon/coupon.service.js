@@ -101,9 +101,20 @@ const deleteCoupon = (id) => __awaiter(void 0, void 0, void 0, function* () {
     }
     return result;
 });
+const updateCoupon = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield coupon_model_1.Coupon.findByIdAndUpdate(id, payload, {
+        new: true,
+        runValidators: true,
+    });
+    if (!result) {
+        throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "Coupon not found");
+    }
+    return result;
+});
 exports.CouponServices = {
     createCoupon,
     getAllCoupons,
     validateCoupon,
     deleteCoupon,
+    updateCoupon,
 };

@@ -133,7 +133,16 @@ const searchProducts = catchAsync(async (req: Request, res: Response, next: Next
 
   const emptyResult = { products: [], meta: { page, limit, skip: 0, total: 0 } };
   const result = query
-    ? await ProductServices.searchProducts(query, { page, limit, minPrice, maxPrice, availability, brandSlug, subCategorySlug, sortBy })
+    ? await ProductServices.searchProducts(query, {
+        page,
+        limit,
+        minPrice,
+        maxPrice,
+        availability,
+        brandSlug,
+        subCategorySlug,
+        sortBy,
+      })
     : emptyResult;
 
   sendResponse(res, {
@@ -270,7 +279,14 @@ const getSubCategoryProducts = catchAsync(async (req: Request, res: Response, ne
   const sortBy = req.query.sortBy as "newest" | "priceAsc" | "priceDesc" | "popularity" | undefined;
 
   const result = await ProductServices.getProductsBySubCategory(subCategorySlug, {
-    page, limit, search, minPrice, maxPrice, availability, brandSlug, sortBy,
+    page,
+    limit,
+    search,
+    minPrice,
+    maxPrice,
+    availability,
+    brandSlug,
+    sortBy,
   });
 
   sendResponse(res, {
