@@ -53,9 +53,23 @@ const deleteCoupon = catchAsync(async (req: Request, res: Response, next: NextFu
   });
 });
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const updateCoupon = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const id = req.params.id as string;
+  const result = await CouponServices.updateCoupon(id, req.body);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Coupon updated successfully",
+    data: result,
+  });
+});
+
 export const CouponController = {
   createCoupon,
   getAllCoupons,
   validateCoupon,
   deleteCoupon,
+  updateCoupon,
 };
