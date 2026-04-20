@@ -86,7 +86,6 @@ export interface IProduct {
   updatedAt?: Date;
 }
 
-
 export interface SearchProductsOptions {
   page?: number;
   limit?: number;

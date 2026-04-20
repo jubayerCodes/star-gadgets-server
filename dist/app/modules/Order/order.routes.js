@@ -1,0 +1,16 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.OrderRoutes = void 0;
+const express_1 = require("express");
+const order_controller_1 = require("./order.controller");
+const validateRequest_1 = require("../../middlewares/validateRequest");
+const order_validation_1 = require("./order.validation");
+const checkAuth_1 = require("../../middlewares/checkAuth");
+const softAuth_1 = require("../../middlewares/softAuth");
+const user_interface_1 = require("../User/user.interface");
+exports.OrderRoutes = (0, express_1.Router)();
+exports.OrderRoutes.post("/", softAuth_1.softAuth, (0, validateRequest_1.validateRequest)(order_validation_1.createOrderValidation), order_controller_1.OrderController.createOrder);
+exports.OrderRoutes.get("/", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN, user_interface_1.Role.SUPER_ADMIN), order_controller_1.OrderController.getAllOrders);
+exports.OrderRoutes.get("/my", (0, checkAuth_1.checkAuth)(user_interface_1.Role.USER, user_interface_1.Role.ADMIN, user_interface_1.Role.SUPER_ADMIN), order_controller_1.OrderController.getMyOrders);
+exports.OrderRoutes.get("/:id", softAuth_1.softAuth, order_controller_1.OrderController.getOrderById);
+exports.OrderRoutes.patch("/:id/status", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN, user_interface_1.Role.SUPER_ADMIN), (0, validateRequest_1.validateRequest)(order_validation_1.updateOrderStatusValidation), order_controller_1.OrderController.updateOrderStatus);

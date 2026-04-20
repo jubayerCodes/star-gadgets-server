@@ -1,7 +1,11 @@
 import { Router } from "express";
 import { ConfigController } from "./config.controller";
 import { validateRequest } from "../../middlewares/validateRequest";
-import { updateHeaderConfigValidation, updateHeroConfigValidation, updateShippingConfigValidation } from "./config.validation";
+import {
+  updateHeaderConfigValidation,
+  updateHeroConfigValidation,
+  updateShippingConfigValidation,
+} from "./config.validation";
 import { checkAuth } from "../../middlewares/checkAuth";
 import { Role } from "../User/user.interface";
 

@@ -37,9 +37,7 @@ const createOrder = async (payload: CreateOrderPayload, userEmail?: string) => {
     throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, "Store configuration not found");
   }
 
-  const shippingMethodConfig = config.shippingMethods.find(
-    (m) => m.name === payload.shippingMethod
-  );
+  const shippingMethodConfig = config.shippingMethods.find((m) => m.name === payload.shippingMethod);
   if (!shippingMethodConfig) {
     throw new AppError(httpStatus.BAD_REQUEST, "Invalid shipping method");
   }
@@ -55,9 +53,7 @@ const createOrder = async (payload: CreateOrderPayload, userEmail?: string) => {
       throw new AppError(httpStatus.BAD_REQUEST, `Product not found: ${item.productId}`);
     }
 
-    const variant = product.variants.find(
-      (v) => String(v._id) === String(item.variantId)
-    );
+    const variant = product.variants.find((v) => String(v._id) === String(item.variantId));
     if (!variant) {
       throw new AppError(httpStatus.BAD_REQUEST, `Variant not found: ${item.variantId}`);
     }
@@ -65,7 +61,7 @@ const createOrder = async (payload: CreateOrderPayload, userEmail?: string) => {
     if (variant.stock < item.quantity) {
       throw new AppError(
         httpStatus.BAD_REQUEST,
-        `Insufficient stock for "${product.title}". Available: ${variant.stock}`
+        `Insufficient stock for "${product.title}". Available: ${variant.stock}`,
       );
     }
 
@@ -150,7 +146,7 @@ const createOrder = async (payload: CreateOrderPayload, userEmail?: string) => {
     for (const item of payload.items) {
       await Product.updateOne(
         { _id: item.productId, "variants._id": item.variantId },
-        { $inc: { "variants.$.stock": -item.quantity } }
+        { $inc: { "variants.$.stock": -item.quantity } },
       );
     }
 
@@ -188,10 +184,7 @@ const getMyOrders = async (userEmail: string, query: Record<string, string>) => 
   const user = await User.findOne({ email: userEmail }).select("_id");
   if (!user) throw new AppError(httpStatus.NOT_FOUND, "User not found");
 
-  const pipeline = [
-    { $match: { userId: user._id } },
-    { $sort: { createdAt: -1 as const } },
-  ];
+  const pipeline = [{ $match: { userId: user._id } }, { $sort: { createdAt: -1 as const } }];
 
   const countResult = await Order.aggregate([...pipeline, { $count: "total" }]);
   const total = countResult[0]?.total ?? 0;
@@ -230,7 +223,7 @@ const updateOrderStatus = async (id: string, orderStatus: OrderStatus) => {
     for (const item of order.items) {
       await Product.updateOne(
         { _id: item.productId, "variants._id": item.variantId },
-        { $inc: { "variants.$.stock": item.quantity } }
+        { $inc: { "variants.$.stock": item.quantity } },
       );
     }
     if (order.coupon) {

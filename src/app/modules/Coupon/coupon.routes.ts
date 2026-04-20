@@ -11,30 +11,18 @@ CouponRoutes.post(
   "/",
   checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
   validateRequest(createCouponValidation),
-  CouponController.createCoupon
+  CouponController.createCoupon,
 );
 
-CouponRoutes.get(
-  "/",
-  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
-  CouponController.getAllCoupons
-);
+CouponRoutes.get("/", checkAuth(Role.ADMIN, Role.SUPER_ADMIN), CouponController.getAllCoupons);
 
-CouponRoutes.post(
-  "/validate",
-  validateRequest(validateCouponValidation),
-  CouponController.validateCoupon
-);
+CouponRoutes.post("/validate", validateRequest(validateCouponValidation), CouponController.validateCoupon);
 
 CouponRoutes.patch(
   "/:id",
   checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
   validateRequest(updateCouponValidation),
-  CouponController.updateCoupon
+  CouponController.updateCoupon,
 );
 
-CouponRoutes.delete(
-  "/:id",
-  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
-  CouponController.deleteCoupon
-);
+CouponRoutes.delete("/:id", checkAuth(Role.ADMIN, Role.SUPER_ADMIN), CouponController.deleteCoupon);

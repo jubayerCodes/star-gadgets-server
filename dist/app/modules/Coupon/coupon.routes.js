@@ -11,4 +11,5 @@ exports.CouponRoutes = (0, express_1.Router)();
 exports.CouponRoutes.post("/", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN, user_interface_1.Role.SUPER_ADMIN), (0, validateRequest_1.validateRequest)(coupon_validation_1.createCouponValidation), coupon_controller_1.CouponController.createCoupon);
 exports.CouponRoutes.get("/", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN, user_interface_1.Role.SUPER_ADMIN), coupon_controller_1.CouponController.getAllCoupons);
 exports.CouponRoutes.post("/validate", (0, validateRequest_1.validateRequest)(coupon_validation_1.validateCouponValidation), coupon_controller_1.CouponController.validateCoupon);
+exports.CouponRoutes.patch("/:id", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN, user_interface_1.Role.SUPER_ADMIN), (0, validateRequest_1.validateRequest)(coupon_validation_1.updateCouponValidation), coupon_controller_1.CouponController.updateCoupon);
 exports.CouponRoutes.delete("/:id", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN, user_interface_1.Role.SUPER_ADMIN), coupon_controller_1.CouponController.deleteCoupon);
