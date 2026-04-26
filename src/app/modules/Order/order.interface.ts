@@ -1,4 +1,5 @@
 import { Types } from "mongoose";
+import { PaymentMethod } from "../Payment/payment.interface";
 
 // Re-export from Payment module so existing imports keep working
 export { PaymentStatus } from "../Payment/payment.interface";
@@ -53,6 +54,7 @@ export interface IOrder {
   coupon?: ICouponSnapshot;
   discount: number;
   total: number;
+  paymentMethod: PaymentMethod;
   /** Reference to the linked Payment document */
   paymentId?: Types.ObjectId;
   orderStatus: OrderStatus;
