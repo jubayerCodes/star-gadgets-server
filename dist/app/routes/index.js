@@ -13,6 +13,7 @@ const product_route_1 = require("../modules/Product/product.route");
 const badge_route_1 = require("../modules/Badge/badge.route");
 const coupon_routes_1 = require("../modules/Coupon/coupon.routes");
 const order_routes_1 = require("../modules/Order/order.routes");
+const payment_routes_1 = require("../modules/Payment/payment.routes");
 exports.router = (0, express_1.Router)();
 const moduleRoutes = [
     {
@@ -58,6 +59,10 @@ const moduleRoutes = [
     {
         path: "/orders",
         route: order_routes_1.OrderRoutes,
+    },
+    {
+        path: "/payments",
+        route: payment_routes_1.PaymentRoutes,
     },
 ];
 moduleRoutes.forEach((route) => {

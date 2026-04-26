@@ -49,8 +49,7 @@ const getMyOrders = catchAsync(async (req: Request, res: Response, next: NextFun
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getOrderById = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const reqUser = (req as any).user;
+  const reqUser = getUserFromReq(req);
   const result = await OrderServices.getOrderById(req.params.id as string, reqUser?.email, reqUser?.role);
 
   sendResponse(res, {
@@ -73,10 +72,24 @@ const updateOrderStatus = catchAsync(async (req: Request, res: Response, next: N
   });
 });
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const cancelOrder = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const user = getUserFromReq(req);
+  const result = await OrderServices.cancelOrder(req.params.id as string, user.email);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Order cancelled successfully",
+    data: result,
+  });
+});
+
 export const OrderController = {
   createOrder,
   getAllOrders,
   getMyOrders,
   getOrderById,
   updateOrderStatus,
+  cancelOrder,
 };

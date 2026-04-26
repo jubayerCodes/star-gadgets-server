@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@types/multer": "^2.0.0",
+    "axios": "^1.15.2",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.9.0",
     "cookie-parser": "^1.4.7",

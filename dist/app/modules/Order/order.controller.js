@@ -47,7 +47,7 @@ const getMyOrders = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(v
     });
 }));
 const getOrderById = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const reqUser = req.user;
+    const reqUser = (0, getUserFromReq_1.getUserFromReq)(req);
     const result = yield order_service_1.OrderServices.getOrderById(req.params.id, reqUser === null || reqUser === void 0 ? void 0 : reqUser.email, reqUser === null || reqUser === void 0 ? void 0 : reqUser.role);
     (0, sendResponse_1.sendResponse)(res, {
         statusCode: 200,
@@ -65,10 +65,21 @@ const updateOrderStatus = (0, catchAsync_1.catchAsync)((req, res, next) => __awa
         data: result,
     });
 }));
+const cancelOrder = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = (0, getUserFromReq_1.getUserFromReq)(req);
+    const result = yield order_service_1.OrderServices.cancelOrder(req.params.id, user.email);
+    (0, sendResponse_1.sendResponse)(res, {
+        statusCode: 200,
+        success: true,
+        message: "Order cancelled successfully",
+        data: result,
+    });
+}));
 exports.OrderController = {
     createOrder,
     getAllOrders,
     getMyOrders,
     getOrderById,
     updateOrderStatus,
+    cancelOrder,
 };
