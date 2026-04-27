@@ -34,6 +34,18 @@ const getPaymentById = catchAsync(async (req: Request, res: Response, next: Next
     data: result,
   });
 });
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const getPaymentByTransactionId = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const result = await PaymentServices.getPaymentByTransactionId(req.params.transactionId as string);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Payment fetched successfully",
+    data: result,
+  });
+});
+
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getAllPayments = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
@@ -79,7 +91,7 @@ const paymentFail = catchAsync(async (req: Request, res: Response, next: NextFun
 
   const result = await PaymentServices.paymentFail(query);
 
-  if (result.success) {
+  if (!result.success) {
     return res.redirect(
       `${envVars.CLIENT_URL}${envVars.SSL.SSL_FAIL_FRONTEND_URL}?transactionId=${query.transactionId}`,
     );
@@ -91,19 +103,35 @@ const paymentCancel = catchAsync(async (req: Request, res: Response, next: NextF
   const query = req.query as Record<string, string>;
   const result = await PaymentServices.paymentCancel(query);
 
-  if (result.success) {
+  if (!result.success) {
     return res.redirect(
       `${envVars.CLIENT_URL}${envVars.SSL.SSL_CANCEL_FRONTEND_URL}?transactionId=${query.transactionId}`,
     );
   }
 });
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const initiatePayment = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+
+  const user = getUserFromReq(req);
+  const result = await PaymentServices.initiatePayment(req.params.orderId as string, user.email);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Payment initiated successfully",
+    data: result,
+  });
+});
+
 export const PaymentController = {
   getPaymentByOrderId,
+  getPaymentByTransactionId,
   getPaymentById,
   getAllPayments,
   updatePaymentStatus,
   paymentSuccess,
   paymentFail,
   paymentCancel,
+  initiatePayment,
 };

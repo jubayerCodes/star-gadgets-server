@@ -22,7 +22,7 @@ export interface IPayment {
   dueAmount: number;
   paymentMethod: PaymentMethod;
   status: PaymentStatus;
-  transactionId?: string;
+  transactionId: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   paymentGatewayData?: any;
   createdAt?: Date;

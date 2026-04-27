@@ -56,6 +56,7 @@ const user_model_1 = require("../User/user.model");
 const order_interface_1 = require("./order.interface");
 const payment_interface_1 = require("../Payment/payment.interface");
 const payment_service_1 = require("../Payment/payment.service");
+const payment_model_1 = require("../Payment/payment.model");
 const extractSearchQuery_1 = require("../../utils/extractSearchQuery");
 const mongoose_1 = __importStar(require("mongoose"));
 const SslCommerz_service_1 = require("../SslCommerz/SslCommerz.service");
@@ -256,6 +257,12 @@ const cancelOrder = (id, userEmail) => __awaiter(void 0, void 0, void 0, functio
     const nonCancellableStatuses = [order_interface_1.OrderStatus.SHIPPED, order_interface_1.OrderStatus.DELIVERED, order_interface_1.OrderStatus.CANCELLED];
     if (nonCancellableStatuses.includes(order.orderStatus)) {
         throw new AppError_1.default(http_status_codes_1.default.CONFLICT, `Order cannot be cancelled — current status: ${order.orderStatus}`);
+    }
+    if (order.paymentId) {
+        const payment = yield payment_model_1.Payment.findById(order.paymentId);
+        if (payment && payment.paymentMethod === payment_interface_1.PaymentMethod.ONLINE && payment.status === payment_interface_1.PaymentStatus.PAID) {
+            throw new AppError_1.default(http_status_codes_1.default.CONFLICT, "This order cannot be cancelled because the online payment has already been completed. Please contact support for a refund.");
+        }
     }
     for (const item of order.items) {
         yield product_model_1.Product.updateOne({ _id: item.productId, "variants._id": item.variantId }, { $inc: { "variants.$.stock": item.quantity } });

@@ -56,6 +56,7 @@ const order_model_1 = require("../Order/order.model");
 const user_model_1 = require("../User/user.model");
 const user_interface_1 = require("../User/user.interface");
 const order_interface_1 = require("../Order/order.interface");
+const SslCommerz_service_1 = require("../SslCommerz/SslCommerz.service");
 const createPayment = (orderId, amount, paymentMethod, transactionId, session) => __awaiter(void 0, void 0, void 0, function* () {
     const [payment] = yield payment_model_1.Payment.create([
         {
@@ -93,6 +94,13 @@ const getPaymentByOrderId = (orderId, email, role) => __awaiter(void 0, void 0, 
 });
 const getPaymentById = (id) => __awaiter(void 0, void 0, void 0, function* () {
     const payment = yield payment_model_1.Payment.findById(id);
+    if (!payment) {
+        throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "Payment not found");
+    }
+    return payment;
+});
+const getPaymentByTransactionId = (transactionId) => __awaiter(void 0, void 0, void 0, function* () {
+    const payment = yield payment_model_1.Payment.findOne({ transactionId });
     if (!payment) {
         throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "Payment not found");
     }
@@ -143,10 +151,10 @@ const paymentFail = (query) => __awaiter(void 0, void 0, void 0, function* () {
     const session = yield mongoose_1.default.startSession();
     try {
         yield session.withTransaction(() => __awaiter(void 0, void 0, void 0, function* () {
-            yield payment_model_1.Payment.findOneAndUpdate({ transactionId }, {
+            const payment = yield payment_model_1.Payment.findOneAndUpdate({ transactionId }, {
                 status: payment_interface_1.PaymentStatus.FAILED,
             }, { session });
-            yield order_model_1.Order.findOneAndUpdate({ transactionId }, {
+            yield order_model_1.Order.findByIdAndUpdate(payment === null || payment === void 0 ? void 0 : payment.orderId, {
                 orderStatus: order_interface_1.OrderStatus.FAILED,
             }, { session });
         }));
@@ -154,17 +162,17 @@ const paymentFail = (query) => __awaiter(void 0, void 0, void 0, function* () {
     finally {
         session.endSession();
     }
-    return { success: true };
+    return { success: false };
 });
 const paymentCancel = (query) => __awaiter(void 0, void 0, void 0, function* () {
     const transactionId = query.transactionId;
     const session = yield mongoose_1.default.startSession();
     try {
         yield session.withTransaction(() => __awaiter(void 0, void 0, void 0, function* () {
-            yield payment_model_1.Payment.findOneAndUpdate({ transactionId }, {
+            const payment = yield payment_model_1.Payment.findOneAndUpdate({ transactionId }, {
                 status: payment_interface_1.PaymentStatus.CANCELLED,
             }, { session });
-            yield order_model_1.Order.findOneAndUpdate({ transactionId }, {
+            yield order_model_1.Order.findByIdAndUpdate(payment === null || payment === void 0 ? void 0 : payment.orderId, {
                 orderStatus: order_interface_1.OrderStatus.CANCELLED,
             }, { session });
         }));
@@ -172,15 +180,53 @@ const paymentCancel = (query) => __awaiter(void 0, void 0, void 0, function* () 
     finally {
         session.endSession();
     }
-    return { success: true };
+    return { success: false };
+});
+const initiatePayment = (orderId, userEmail) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const user = yield user_model_1.User.findOne({ email: userEmail }).select("_id");
+    if (!user) {
+        throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "User not found");
+    }
+    const order = yield order_model_1.Order.findById(orderId).populate("userId");
+    if (!order) {
+        throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "Order not found");
+    }
+    if (String((_a = order.userId) === null || _a === void 0 ? void 0 : _a._id) !== String(user._id)) {
+        throw new AppError_1.default(http_status_codes_1.default.FORBIDDEN, "You are not authorized to pay for the order");
+    }
+    const payment = yield payment_model_1.Payment.findOne({ orderId });
+    if (!payment) {
+        throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "Payment not found");
+    }
+    if (payment.paymentMethod === payment_interface_1.PaymentMethod.COD) {
+        throw new AppError_1.default(http_status_codes_1.default.BAD_REQUEST, "Pay upon delivery");
+    }
+    if (payment.status === payment_interface_1.PaymentStatus.PAID) {
+        throw new AppError_1.default(http_status_codes_1.default.BAD_REQUEST, "Already Paid");
+    }
+    const paymentResponse = yield SslCommerz_service_1.SslCommerzService.sslPaymentInit({
+        amount: order.total,
+        transactionId: payment.transactionId,
+        name: order.billingDetails.firstName + " " + order.billingDetails.lastName,
+        email: order.billingDetails.email,
+        streetAddress: order.billingDetails.streetAddress,
+        city: order.billingDetails.city,
+        district: order.billingDetails.district,
+        postcode: order.billingDetails.postcode,
+        phone: order.billingDetails.phone,
+    });
+    return { GatewayPageURL: paymentResponse.GatewayPageURL };
 });
 exports.PaymentServices = {
     createPayment,
     getPaymentByOrderId,
     getPaymentById,
+    getPaymentByTransactionId,
     getAllPayments,
     updatePaymentStatus,
     paymentSuccess,
     paymentFail,
     paymentCancel,
+    initiatePayment,
 };

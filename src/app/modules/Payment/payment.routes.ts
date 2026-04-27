@@ -11,6 +11,9 @@ export const PaymentRoutes = Router();
 // Get payment linked to a specific order (admin or order owner via softAuth)
 PaymentRoutes.get("/order/:orderId", softAuth, PaymentController.getPaymentByOrderId);
 
+// Get payment by transactionId (public — transactionId is unguessable, used by payment status pages)
+PaymentRoutes.get("/transaction/:transactionId", PaymentController.getPaymentByTransactionId);
+
 // Get a single payment by its own ID (admin only)
 PaymentRoutes.get("/:id", checkAuth(Role.ADMIN, Role.SUPER_ADMIN), PaymentController.getPaymentById);
 
@@ -20,6 +23,12 @@ PaymentRoutes.get("/", checkAuth(Role.ADMIN, Role.SUPER_ADMIN), PaymentControlle
 PaymentRoutes.post("/success", PaymentController.paymentSuccess);
 PaymentRoutes.post("/fail", PaymentController.paymentFail);
 PaymentRoutes.post("/cancel", PaymentController.paymentCancel);
+
+PaymentRoutes.post(
+  "/initiate/:orderId",
+  checkAuth(Role.USER, Role.ADMIN, Role.SUPER_ADMIN),
+  PaymentController.initiatePayment,
+);
 
 // Update payment status (admin only)
 PaymentRoutes.patch(

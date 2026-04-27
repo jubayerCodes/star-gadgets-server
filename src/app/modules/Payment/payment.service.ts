@@ -9,6 +9,7 @@ import { Order } from "../Order/order.model";
 import { User } from "../User/user.model";
 import { Role } from "../User/user.interface";
 import { OrderStatus } from "../Order/order.interface";
+import { SslCommerzService } from "../SslCommerz/SslCommerz.service";
 
 const createPayment = async (
   orderId: Types.ObjectId,
@@ -70,6 +71,14 @@ const getPaymentById = async (id: string): Promise<IPayment> => {
   return payment;
 };
 
+const getPaymentByTransactionId = async (transactionId: string): Promise<IPayment> => {
+  const payment = await Payment.findOne({ transactionId });
+  if (!payment) {
+    throw new AppError(httpStatus.NOT_FOUND, "Payment not found");
+  }
+  return payment;
+};
+
 const getAllPayments = async (query: Record<string, string>) => {
   const { page, skip, limit } = extractSearchQuery(query);
 
@@ -97,7 +106,7 @@ const updatePaymentStatus = async (id: string, status: PaymentStatus): Promise<I
 
 const paymentSuccess = async (query: Record<string, string>) => {
   const transactionId = query.transactionId;
-  const amount = query.amount
+  const amount = query.amount;
   const session = await mongoose.startSession();
 
   try {
@@ -134,7 +143,7 @@ const paymentFail = async (query: Record<string, string>) => {
 
   try {
     await session.withTransaction(async () => {
-      await Payment.findOneAndUpdate(
+      const payment = await Payment.findOneAndUpdate(
         { transactionId },
         {
           status: PaymentStatus.FAILED,
@@ -142,8 +151,8 @@ const paymentFail = async (query: Record<string, string>) => {
         { session },
       );
 
-      await Order.findOneAndUpdate(
-        { transactionId },
+      await Order.findByIdAndUpdate(
+        payment?.orderId,
         {
           orderStatus: OrderStatus.FAILED,
         },
@@ -154,7 +163,7 @@ const paymentFail = async (query: Record<string, string>) => {
     session.endSession();
   }
 
-  return { success: true };
+  return { success: false };
 };
 
 const paymentCancel = async (query: Record<string, string>) => {
@@ -164,7 +173,7 @@ const paymentCancel = async (query: Record<string, string>) => {
 
   try {
     await session.withTransaction(async () => {
-      await Payment.findOneAndUpdate(
+      const payment = await Payment.findOneAndUpdate(
         { transactionId },
         {
           status: PaymentStatus.CANCELLED,
@@ -172,8 +181,8 @@ const paymentCancel = async (query: Record<string, string>) => {
         { session },
       );
 
-      await Order.findOneAndUpdate(
-        { transactionId },
+      await Order.findByIdAndUpdate(
+        payment?.orderId,
         {
           orderStatus: OrderStatus.CANCELLED,
         },
@@ -184,16 +193,63 @@ const paymentCancel = async (query: Record<string, string>) => {
     session.endSession();
   }
 
-  return { success: true };
+  return { success: false };
+};
+
+const initiatePayment = async (orderId: string, userEmail: string) => {
+  const user = await User.findOne({ email: userEmail }).select("_id");
+
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found");
+  }
+
+  const order = await Order.findById(orderId).populate("userId");
+
+  if (!order) {
+    throw new AppError(httpStatus.NOT_FOUND, "Order not found");
+  }
+
+  if (String(order.userId?._id) !== String(user._id)) {
+    throw new AppError(httpStatus.FORBIDDEN, "You are not authorized to pay for the order");
+  }
+
+  const payment = await Payment.findOne({ orderId });
+  if (!payment) {
+    throw new AppError(httpStatus.NOT_FOUND, "Payment not found");
+  }
+
+  if (payment.paymentMethod === PaymentMethod.COD) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Pay upon delivery");
+  }
+
+  if (payment.status === PaymentStatus.PAID) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Already Paid");
+  }
+
+  const paymentResponse = await SslCommerzService.sslPaymentInit({
+    amount: order.total,
+    transactionId: payment.transactionId,
+    name: order.billingDetails.firstName + " " + order.billingDetails.lastName,
+    email: order.billingDetails.email,
+    streetAddress: order.billingDetails.streetAddress,
+    city: order.billingDetails.city,
+    district: order.billingDetails.district,
+    postcode: order.billingDetails.postcode,
+    phone: order.billingDetails.phone,
+  });
+
+  return { GatewayPageURL: paymentResponse.GatewayPageURL };
 };
 
 export const PaymentServices = {
   createPayment,
   getPaymentByOrderId,
   getPaymentById,
+  getPaymentByTransactionId,
   getAllPayments,
   updatePaymentStatus,
   paymentSuccess,
   paymentFail,
   paymentCancel,
+  initiatePayment,
 };

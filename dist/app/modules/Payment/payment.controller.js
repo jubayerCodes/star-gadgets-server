@@ -34,6 +34,15 @@ const getPaymentById = (0, catchAsync_1.catchAsync)((req, res, next) => __awaite
         data: result,
     });
 }));
+const getPaymentByTransactionId = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield payment_service_1.PaymentServices.getPaymentByTransactionId(req.params.transactionId);
+    (0, sendResponse_1.sendResponse)(res, {
+        statusCode: 200,
+        success: true,
+        message: "Payment fetched successfully",
+        data: result,
+    });
+}));
 const getAllPayments = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { payments, meta } = yield payment_service_1.PaymentServices.getAllPayments(req.query);
     (0, sendResponse_1.sendResponse)(res, {
@@ -63,23 +72,35 @@ const paymentSuccess = (0, catchAsync_1.catchAsync)((req, res, next) => __awaite
 const paymentFail = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const query = req.query;
     const result = yield payment_service_1.PaymentServices.paymentFail(query);
-    if (result.success) {
+    if (!result.success) {
         return res.redirect(`${env_1.envVars.CLIENT_URL}${env_1.envVars.SSL.SSL_FAIL_FRONTEND_URL}?transactionId=${query.transactionId}`);
     }
 }));
 const paymentCancel = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const query = req.query;
     const result = yield payment_service_1.PaymentServices.paymentCancel(query);
-    if (result.success) {
+    if (!result.success) {
         return res.redirect(`${env_1.envVars.CLIENT_URL}${env_1.envVars.SSL.SSL_CANCEL_FRONTEND_URL}?transactionId=${query.transactionId}`);
     }
 }));
+const initiatePayment = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = (0, getUserFromReq_1.getUserFromReq)(req);
+    const result = yield payment_service_1.PaymentServices.initiatePayment(req.params.orderId, user.email);
+    (0, sendResponse_1.sendResponse)(res, {
+        statusCode: 200,
+        success: true,
+        message: "Payment initiated successfully",
+        data: result,
+    });
+}));
 exports.PaymentController = {
     getPaymentByOrderId,
+    getPaymentByTransactionId,
     getPaymentById,
     getAllPayments,
     updatePaymentStatus,
     paymentSuccess,
     paymentFail,
     paymentCancel,
+    initiatePayment,
 };

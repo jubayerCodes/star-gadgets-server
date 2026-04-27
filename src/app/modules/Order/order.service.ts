@@ -6,8 +6,9 @@ import { Config } from "../Configuration/config.model";
 import { Product } from "../Product/product.model";
 import { User } from "../User/user.model";
 import { IOrder, IOrderItem, OrderStatus } from "./order.interface";
-import { PaymentMethod } from "../Payment/payment.interface";
+import { PaymentMethod, PaymentStatus } from "../Payment/payment.interface";
 import { PaymentServices } from "../Payment/payment.service";
+import { Payment } from "../Payment/payment.model";
 import { extractSearchQuery } from "../../utils/extractSearchQuery";
 import { IMeta } from "../../utils/sendResponse";
 import mongoose, { Types } from "mongoose";
@@ -311,6 +312,17 @@ const cancelOrder = async (id: string, userEmail: string) => {
   const nonCancellableStatuses: OrderStatus[] = [OrderStatus.SHIPPED, OrderStatus.DELIVERED, OrderStatus.CANCELLED];
   if (nonCancellableStatuses.includes(order.orderStatus)) {
     throw new AppError(httpStatus.CONFLICT, `Order cannot be cancelled — current status: ${order.orderStatus}`);
+  }
+
+  // Block cancellation if the payment was made online and is already PAID
+  if (order.paymentId) {
+    const payment = await Payment.findById(order.paymentId);
+    if (payment && payment.paymentMethod === PaymentMethod.ONLINE && payment.status === PaymentStatus.PAID) {
+      throw new AppError(
+        httpStatus.CONFLICT,
+        "This order cannot be cancelled because the online payment has already been completed. Please contact support for a refund.",
+      );
+    }
   }
 
   // Restore stock and coupon usage
