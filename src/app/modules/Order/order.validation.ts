@@ -28,6 +28,7 @@ export const createOrderValidation = z.object({
   billingDetails: billingDetailsValidation,
   items: z.array(orderItemValidation).min(1, "Order must have at least one item"),
   shippingMethod: z.string().min(1),
+  /** paymentMethod is used only to initialise the linked Payment document */
   paymentMethod: z.enum(["cod", "online"]),
   coupon: couponValidation.nullable().optional(),
   orderNotes: z.string().optional(),

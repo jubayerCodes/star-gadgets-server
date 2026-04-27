@@ -13,4 +13,5 @@ exports.OrderRoutes.post("/", softAuth_1.softAuth, (0, validateRequest_1.validat
 exports.OrderRoutes.get("/", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN, user_interface_1.Role.SUPER_ADMIN), order_controller_1.OrderController.getAllOrders);
 exports.OrderRoutes.get("/my", (0, checkAuth_1.checkAuth)(user_interface_1.Role.USER, user_interface_1.Role.ADMIN, user_interface_1.Role.SUPER_ADMIN), order_controller_1.OrderController.getMyOrders);
 exports.OrderRoutes.get("/:id", softAuth_1.softAuth, order_controller_1.OrderController.getOrderById);
+exports.OrderRoutes.patch("/:id/cancel", (0, checkAuth_1.checkAuth)(user_interface_1.Role.USER, user_interface_1.Role.ADMIN, user_interface_1.Role.SUPER_ADMIN), order_controller_1.OrderController.cancelOrder);
 exports.OrderRoutes.patch("/:id/status", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN, user_interface_1.Role.SUPER_ADMIN), (0, validateRequest_1.validateRequest)(order_validation_1.updateOrderStatusValidation), order_controller_1.OrderController.updateOrderStatus);

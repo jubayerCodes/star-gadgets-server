@@ -1,4 +1,8 @@
 import { Types } from "mongoose";
+import { PaymentMethod } from "../Payment/payment.interface";
+
+// Re-export from Payment module so existing imports keep working
+export { PaymentStatus } from "../Payment/payment.interface";
 
 export enum OrderStatus {
   PENDING = "PENDING",
@@ -7,11 +11,7 @@ export enum OrderStatus {
   SHIPPED = "SHIPPED",
   DELIVERED = "DELIVERED",
   CANCELLED = "CANCELLED",
-}
-
-export enum PaymentStatus {
-  UNPAID = "UNPAID",
-  PAID = "PAID",
+  FAILED = "FAILED",
 }
 
 export interface IBillingDetails {
@@ -54,8 +54,9 @@ export interface IOrder {
   coupon?: ICouponSnapshot;
   discount: number;
   total: number;
-  paymentMethod: "cod" | "online";
-  paymentStatus: PaymentStatus;
+  paymentMethod: PaymentMethod;
+  /** Reference to the linked Payment document */
+  paymentId?: Types.ObjectId;
   orderStatus: OrderStatus;
   orderNotes?: string;
   createdAt?: Date;
