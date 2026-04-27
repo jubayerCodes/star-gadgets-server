@@ -1,6 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PaymentStatus = exports.OrderStatus = void 0;
+exports.OrderStatus = exports.PaymentStatus = void 0;
+var payment_interface_1 = require("../Payment/payment.interface");
+Object.defineProperty(exports, "PaymentStatus", { enumerable: true, get: function () { return payment_interface_1.PaymentStatus; } });
 var OrderStatus;
 (function (OrderStatus) {
     OrderStatus["PENDING"] = "PENDING";
@@ -9,9 +11,5 @@ var OrderStatus;
     OrderStatus["SHIPPED"] = "SHIPPED";
     OrderStatus["DELIVERED"] = "DELIVERED";
     OrderStatus["CANCELLED"] = "CANCELLED";
+    OrderStatus["FAILED"] = "FAILED";
 })(OrderStatus || (exports.OrderStatus = OrderStatus = {}));
-var PaymentStatus;
-(function (PaymentStatus) {
-    PaymentStatus["UNPAID"] = "UNPAID";
-    PaymentStatus["PAID"] = "PAID";
-})(PaymentStatus || (exports.PaymentStatus = PaymentStatus = {}));

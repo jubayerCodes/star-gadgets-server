@@ -20,6 +20,9 @@ OrderRoutes.get("/my", checkAuth(Role.USER, Role.ADMIN, Role.SUPER_ADMIN), Order
 // Single order detail (softAuth — admin or owner)
 OrderRoutes.get("/:id", softAuth, OrderController.getOrderById);
 
+// Logged-in user: cancel their own order (before it ships)
+OrderRoutes.patch("/:id/cancel", checkAuth(Role.USER, Role.ADMIN, Role.SUPER_ADMIN), OrderController.cancelOrder);
+
 // Admin: update order status
 OrderRoutes.patch(
   "/:id/status",
