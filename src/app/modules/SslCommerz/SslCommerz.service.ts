@@ -6,6 +6,9 @@ import httpStatus from "http-status-codes";
 
 const sslPaymentInit = async (payload: ISslCommerzInit) => {
   try {
+    // Use dedicated shipping address for ship_* fields when provided; else fall back to billing
+    const ship = payload.shipping;
+
     const data: ISslCommerzRequest = {
       store_id: envVars.SSL.SSL_STORE_ID,
       store_passwd: envVars.SSL.SSL_STORE_PASS,
@@ -17,6 +20,7 @@ const sslPaymentInit = async (payload: ISslCommerzInit) => {
       success_url: `${envVars.SERVER_URL}${envVars.SSL.SSL_SUCCESS_BACKEND_URL}?transactionId=${payload.transactionId}&amount=${payload.amount}`,
       fail_url: `${envVars.SERVER_URL}${envVars.SSL.SSL_FAIL_BACKEND_URL}?transactionId=${payload.transactionId}`,
       cancel_url: `${envVars.SERVER_URL}${envVars.SSL.SSL_CANCEL_BACKEND_URL}?transactionId=${payload.transactionId}`,
+      // Customer (billing) fields
       cus_name: payload.name,
       cus_email: payload.email,
       cus_add1: payload.streetAddress,
@@ -25,11 +29,12 @@ const sslPaymentInit = async (payload: ISslCommerzInit) => {
       cus_postcode: payload.postcode || "N/A",
       cus_country: "Bangladesh",
       cus_phone: payload.phone,
-      ship_name: payload.name,
-      ship_add1: payload.streetAddress,
-      ship_city: payload.city,
-      ship_state: payload.district,
-      ship_postcode: payload.postcode || "N/A",
+      // Shipping fields — use dedicated shipping address if provided, else use billing
+      ship_name: ship?.name ?? payload.name,
+      ship_add1: ship?.streetAddress ?? payload.streetAddress,
+      ship_city: ship?.city ?? payload.city,
+      ship_state: ship?.district ?? payload.district,
+      ship_postcode: ship?.postcode ?? payload.postcode ?? "N/A",
       ship_country: "Bangladesh",
       multi_card_name: "mobilebank,internetbank,mastercard,visacard,amexcard",
     };

@@ -1,10 +1,21 @@
 import { z } from "zod";
 import { OrderStatus } from "./order.interface";
 
-const billingDetailsValidation = z.object({
+const addressValidation = z.object({
   firstName: z.string().min(1),
   lastName: z.string().min(1),
   email: z.string().email(),
+  streetAddress: z.string().min(1),
+  city: z.string().min(1),
+  district: z.string().min(1),
+  postcode: z.string().optional(),
+  phone: z.string().min(1),
+});
+
+const shippingAddressValidation = z.object({
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
+  email: z.string().email().optional(),
   streetAddress: z.string().min(1),
   city: z.string().min(1),
   district: z.string().min(1),
@@ -25,7 +36,8 @@ const couponValidation = z.object({
 });
 
 export const createOrderValidation = z.object({
-  billingDetails: billingDetailsValidation,
+  billingDetails: addressValidation,
+  shippingDetails: shippingAddressValidation.optional(),
   items: z.array(orderItemValidation).min(1, "Order must have at least one item"),
   shippingMethod: z.string().min(1),
   /** paymentMethod is used only to initialise the linked Payment document */
