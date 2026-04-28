@@ -188,7 +188,7 @@ const initiatePayment = (orderId, userEmail) => __awaiter(void 0, void 0, void 0
     if (!user) {
         throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "User not found");
     }
-    const order = yield order_model_1.Order.findById(orderId).populate("userId");
+    const order = yield order_model_1.Order.findById(orderId).populate("userId").populate("billingDetailsId");
     if (!order) {
         throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "Order not found");
     }
@@ -205,16 +205,17 @@ const initiatePayment = (orderId, userEmail) => __awaiter(void 0, void 0, void 0
     if (payment.status === payment_interface_1.PaymentStatus.PAID) {
         throw new AppError_1.default(http_status_codes_1.default.BAD_REQUEST, "Already Paid");
     }
+    const billing = order.billingDetails;
     const paymentResponse = yield SslCommerz_service_1.SslCommerzService.sslPaymentInit({
         amount: order.total,
         transactionId: payment.transactionId,
-        name: order.billingDetails.firstName + " " + order.billingDetails.lastName,
-        email: order.billingDetails.email,
-        streetAddress: order.billingDetails.streetAddress,
-        city: order.billingDetails.city,
-        district: order.billingDetails.district,
-        postcode: order.billingDetails.postcode,
-        phone: order.billingDetails.phone,
+        name: billing.firstName + " " + billing.lastName,
+        email: billing.email,
+        streetAddress: billing.streetAddress,
+        city: billing.city,
+        district: billing.district,
+        postcode: billing.postcode,
+        phone: billing.phone,
     });
     return { GatewayPageURL: paymentResponse.GatewayPageURL };
 });

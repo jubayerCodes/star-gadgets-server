@@ -5,7 +5,7 @@ import { Coupon } from "../Coupon/coupon.model";
 import { Config } from "../Configuration/config.model";
 import { Product } from "../Product/product.model";
 import { User } from "../User/user.model";
-import { IOrder, IOrderItem, OrderStatus } from "./order.interface";
+import { IBillingDetails, IOrder, IOrderItem, IShippingDetails, OrderStatus } from "./order.interface";
 import { PaymentMethod, PaymentStatus } from "../Payment/payment.interface";
 import { PaymentServices } from "../Payment/payment.service";
 import { Payment } from "../Payment/payment.model";
@@ -15,7 +15,8 @@ import mongoose, { Types } from "mongoose";
 import { SslCommerzService } from "../SslCommerz/SslCommerz.service";
 
 interface CreateOrderPayload {
-  billingDetails: IOrder["billingDetails"];
+  billingDetails: IBillingDetails;
+  shippingDetails?: IShippingDetails;
   items: {
     productId: string;
     variantId: string;
@@ -128,16 +129,16 @@ const createOrder = async (payload: CreateOrderPayload, userEmail?: string) => {
   const transactionId = `tran_${Date.now()}_${String(Math.floor(Math.random() * 1000000)).padStart(6, "0")}`;
 
   // ── 6. Run all writes atomically inside a MongoDB session ─────────────────
-  // If any step below throws, withTransaction() aborts and rolls back every write.
   const session = await mongoose.startSession();
   let paymentUrl: string | undefined;
   let orderId: Types.ObjectId | undefined;
 
   try {
     await session.withTransaction(async () => {
-      // 6a. Create the Order document
+      // 6a. Create the Order document with embedded billing/shipping snapshots
       const orderData: Partial<IOrder> = {
         billingDetails: payload.billingDetails,
+        ...(payload.shippingDetails && { shippingDetails: payload.shippingDetails }),
         items: resolvedItems,
         subtotal,
         shippingMethod: payload.shippingMethod,
@@ -151,35 +152,43 @@ const createOrder = async (payload: CreateOrderPayload, userEmail?: string) => {
       };
 
       const [order] = await Order.create([orderData], { session });
+      orderId = order._id as Types.ObjectId;
 
       // 6b. Create the linked Payment document (same session)
       const paymentMethodEnum = payload.paymentMethod === "cod" ? PaymentMethod.COD : PaymentMethod.ONLINE;
-      const payment = await PaymentServices.createPayment(
-        order._id as Types.ObjectId,
-        total,
-        paymentMethodEnum,
-        transactionId,
-        session,
-      );
+      const payment = await PaymentServices.createPayment(orderId, total, paymentMethodEnum, transactionId, session);
 
       if (payload.paymentMethod === PaymentMethod.ONLINE) {
+        const billing = payload.billingDetails;
+        const shipping = payload.shippingDetails;
+
         const result = await SslCommerzService.sslPaymentInit({
           amount: total,
           transactionId,
-          name: payload.billingDetails.firstName + " " + payload.billingDetails.lastName,
-          email: payload.billingDetails.email,
-          streetAddress: payload.billingDetails.streetAddress,
-          city: payload.billingDetails.city,
-          district: payload.billingDetails.district,
-          postcode: payload.billingDetails.postcode,
-          phone: payload.billingDetails.phone,
+          name: `${billing.firstName} ${billing.lastName}`,
+          email: billing.email,
+          streetAddress: billing.streetAddress,
+          city: billing.city,
+          district: billing.district,
+          postcode: billing.postcode,
+          phone: billing.phone,
+          // Pass dedicated shipping address for ship_* fields when ship-to-different-address is used
+          ...(shipping && {
+            shipping: {
+              name: `${shipping.firstName} ${shipping.lastName}`,
+              streetAddress: shipping.streetAddress,
+              city: shipping.city,
+              district: shipping.district,
+              postcode: shipping.postcode,
+            },
+          }),
         });
 
         paymentUrl = result.GatewayPageURL;
       }
 
       // 6c. Link paymentId back to the order
-      await Order.updateOne({ _id: order._id }, { $set: { paymentId: payment._id } }, { session });
+      await Order.updateOne({ _id: orderId }, { $set: { paymentId: payment._id } }, { session });
 
       // 6d. Decrement stock for each purchased item
       for (const item of payload.items) {
@@ -194,8 +203,6 @@ const createOrder = async (payload: CreateOrderPayload, userEmail?: string) => {
       if (couponSnapshot) {
         await Coupon.updateOne({ _id: couponSnapshot.couponId }, { $inc: { usedCount: 1 } }, { session });
       }
-
-      orderId = order._id as Types.ObjectId;
     });
   } finally {
     session.endSession();
@@ -223,7 +230,6 @@ const getAllOrders = async (query: Record<string, string>) => {
 
   const orders = await Order.aggregate([...pipeline, { $skip: skip }, { $limit: limit }]);
 
-  // Populate paymentId for each order
   const populated = await Order.populate(orders, { path: "paymentId" });
 
   const meta: IMeta = { page, limit, skip, total };

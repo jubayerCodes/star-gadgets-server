@@ -1,5 +1,5 @@
 import { model, Schema } from "mongoose";
-import { IBillingDetails, ICouponSnapshot, IOrder, IOrderItem, OrderStatus } from "./order.interface";
+import { IBillingDetails, ICouponSnapshot, IOrder, IOrderItem, IShippingDetails, OrderStatus } from "./order.interface";
 
 // ── Sub-schemas ──────────────────────────────────────────────────────────────
 
@@ -8,6 +8,20 @@ const billingDetailsSchema = new Schema<IBillingDetails>(
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
     email: { type: String, required: true },
+    streetAddress: { type: String, required: true },
+    city: { type: String, required: true },
+    district: { type: String, required: true },
+    postcode: { type: String },
+    phone: { type: String, required: true },
+  },
+  { _id: false },
+);
+
+const shippingDetailsSchema = new Schema<IShippingDetails>(
+  {
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
+    email: { type: String },
     streetAddress: { type: String, required: true },
     city: { type: String, required: true },
     district: { type: String, required: true },
@@ -55,6 +69,8 @@ const orderSchema = new Schema<IOrder>(
     orderNumber: { type: String, unique: true },
     userId: { type: Schema.Types.ObjectId, ref: "User" },
     billingDetails: { type: billingDetailsSchema, required: true },
+    /** Stored only when customer ships to a different address */
+    shippingDetails: { type: shippingDetailsSchema },
     items: { type: [orderItemSchema], required: true },
     subtotal: { type: Number, required: true },
     shippingMethod: { type: String, required: true },

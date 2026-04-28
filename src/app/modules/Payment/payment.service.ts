@@ -203,7 +203,7 @@ const initiatePayment = async (orderId: string, userEmail: string) => {
     throw new AppError(httpStatus.NOT_FOUND, "User not found");
   }
 
-  const order = await Order.findById(orderId).populate("userId");
+  const order = await Order.findById(orderId).populate("userId").populate("billingDetailsId");
 
   if (!order) {
     throw new AppError(httpStatus.NOT_FOUND, "Order not found");
@@ -226,16 +226,18 @@ const initiatePayment = async (orderId: string, userEmail: string) => {
     throw new AppError(httpStatus.BAD_REQUEST, "Already Paid");
   }
 
+  const billing = order.billingDetails;
+
   const paymentResponse = await SslCommerzService.sslPaymentInit({
     amount: order.total,
     transactionId: payment.transactionId,
-    name: order.billingDetails.firstName + " " + order.billingDetails.lastName,
-    email: order.billingDetails.email,
-    streetAddress: order.billingDetails.streetAddress,
-    city: order.billingDetails.city,
-    district: order.billingDetails.district,
-    postcode: order.billingDetails.postcode,
-    phone: order.billingDetails.phone,
+    name: billing.firstName + " " + billing.lastName,
+    email: billing.email,
+    streetAddress: billing.streetAddress,
+    city: billing.city,
+    district: billing.district,
+    postcode: billing.postcode,
+    phone: billing.phone,
   });
 
   return { GatewayPageURL: paymentResponse.GatewayPageURL };

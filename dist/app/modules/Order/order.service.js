@@ -142,33 +142,33 @@ const createOrder = (payload, userEmail) => __awaiter(void 0, void 0, void 0, fu
     let orderId;
     try {
         yield session.withTransaction(() => __awaiter(void 0, void 0, void 0, function* () {
-            const orderData = Object.assign({ billingDetails: payload.billingDetails, items: resolvedItems, subtotal, shippingMethod: payload.shippingMethod, shippingCost, coupon: couponSnapshot, discount,
-                total, orderStatus: order_interface_1.OrderStatus.PENDING, orderNotes: payload.orderNotes }, (resolvedUserId && { userId: resolvedUserId }));
+            const orderData = Object.assign(Object.assign(Object.assign({ billingDetails: payload.billingDetails }, (payload.shippingDetails && { shippingDetails: payload.shippingDetails })), { items: resolvedItems, subtotal, shippingMethod: payload.shippingMethod, shippingCost, coupon: couponSnapshot, discount,
+                total, orderStatus: order_interface_1.OrderStatus.PENDING, orderNotes: payload.orderNotes }), (resolvedUserId && { userId: resolvedUserId }));
             const [order] = yield order_model_1.Order.create([orderData], { session });
+            orderId = order._id;
             const paymentMethodEnum = payload.paymentMethod === "cod" ? payment_interface_1.PaymentMethod.COD : payment_interface_1.PaymentMethod.ONLINE;
-            const payment = yield payment_service_1.PaymentServices.createPayment(order._id, total, paymentMethodEnum, transactionId, session);
+            const payment = yield payment_service_1.PaymentServices.createPayment(orderId, total, paymentMethodEnum, transactionId, session);
             if (payload.paymentMethod === payment_interface_1.PaymentMethod.ONLINE) {
-                const result = yield SslCommerz_service_1.SslCommerzService.sslPaymentInit({
-                    amount: total,
-                    transactionId,
-                    name: payload.billingDetails.firstName + " " + payload.billingDetails.lastName,
-                    email: payload.billingDetails.email,
-                    streetAddress: payload.billingDetails.streetAddress,
-                    city: payload.billingDetails.city,
-                    district: payload.billingDetails.district,
-                    postcode: payload.billingDetails.postcode,
-                    phone: payload.billingDetails.phone,
-                });
+                const billing = payload.billingDetails;
+                const shipping = payload.shippingDetails;
+                const result = yield SslCommerz_service_1.SslCommerzService.sslPaymentInit(Object.assign({ amount: total, transactionId, name: `${billing.firstName} ${billing.lastName}`, email: billing.email, streetAddress: billing.streetAddress, city: billing.city, district: billing.district, postcode: billing.postcode, phone: billing.phone }, (shipping && {
+                    shipping: {
+                        name: `${shipping.firstName} ${shipping.lastName}`,
+                        streetAddress: shipping.streetAddress,
+                        city: shipping.city,
+                        district: shipping.district,
+                        postcode: shipping.postcode,
+                    },
+                })));
                 paymentUrl = result.GatewayPageURL;
             }
-            yield order_model_1.Order.updateOne({ _id: order._id }, { $set: { paymentId: payment._id } }, { session });
+            yield order_model_1.Order.updateOne({ _id: orderId }, { $set: { paymentId: payment._id } }, { session });
             for (const item of payload.items) {
                 yield product_model_1.Product.updateOne({ _id: item.productId, "variants._id": item.variantId }, { $inc: { "variants.$.stock": -item.quantity } }, { session });
             }
             if (couponSnapshot) {
                 yield coupon_model_1.Coupon.updateOne({ _id: couponSnapshot.couponId }, { $inc: { usedCount: 1 } }, { session });
             }
-            orderId = order._id;
         }));
     }
     finally {

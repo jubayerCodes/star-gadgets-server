@@ -25,6 +25,17 @@ export interface IBillingDetails {
   phone: string;
 }
 
+export interface IShippingDetails {
+  firstName: string;
+  lastName: string;
+  email?: string;
+  streetAddress: string;
+  city: string;
+  district: string;
+  postcode?: string;
+  phone: string;
+}
+
 export interface IOrderItem {
   productId: Types.ObjectId;
   variantId: Types.ObjectId;
@@ -47,6 +58,8 @@ export interface IOrder {
   orderNumber: string;
   userId?: Types.ObjectId;
   billingDetails: IBillingDetails;
+  /** Only present when customer ships to a different address */
+  shippingDetails?: IShippingDetails;
   items: IOrderItem[];
   subtotal: number;
   shippingMethod: string;
