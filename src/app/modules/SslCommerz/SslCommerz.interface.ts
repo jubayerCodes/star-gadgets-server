@@ -26,6 +26,14 @@ export interface ISslCommerzRequest {
   multi_card_name: string;
 }
 
+export interface ISslCommerzShipping {
+  name: string;
+  streetAddress: string;
+  city: string;
+  district: string;
+  postcode?: string;
+}
+
 export interface ISslCommerzInit {
   amount: number;
   transactionId: string;
@@ -36,4 +44,6 @@ export interface ISslCommerzInit {
   district: string;
   postcode?: string;
   phone: string;
+  /** Separate shipping address — used for ship_* fields when customer ships to a different address */
+  shipping?: ISslCommerzShipping;
 }

@@ -13,6 +13,16 @@ const billingDetailsSchema = new mongoose_1.Schema({
     postcode: { type: String },
     phone: { type: String, required: true },
 }, { _id: false });
+const shippingDetailsSchema = new mongoose_1.Schema({
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
+    email: { type: String },
+    streetAddress: { type: String, required: true },
+    city: { type: String, required: true },
+    district: { type: String, required: true },
+    postcode: { type: String },
+    phone: { type: String, required: true },
+}, { _id: false });
 const orderItemSchema = new mongoose_1.Schema({
     productId: { type: mongoose_1.Schema.Types.ObjectId, ref: "Product", required: true },
     variantId: { type: mongoose_1.Schema.Types.ObjectId, required: true },
@@ -37,6 +47,7 @@ const orderSchema = new mongoose_1.Schema({
     orderNumber: { type: String, unique: true },
     userId: { type: mongoose_1.Schema.Types.ObjectId, ref: "User" },
     billingDetails: { type: billingDetailsSchema, required: true },
+    shippingDetails: { type: shippingDetailsSchema },
     items: { type: [orderItemSchema], required: true },
     subtotal: { type: Number, required: true },
     shippingMethod: { type: String, required: true },
