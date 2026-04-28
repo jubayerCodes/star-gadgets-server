@@ -1,16 +1,18 @@
 import { model, Schema } from "mongoose";
-import { IUserAddress, IUser, Role, IAuthProvider, Provider } from "./user.interface";
+import { IAddress, IUser, Role, IAuthProvider, Provider } from "./user.interface";
 
-const AddressSchema = new Schema<IUserAddress>({
-  address: {
-    type: String,
-    required: true,
+const AddressSchema = new Schema<IAddress>(
+  {
+    fullName: { type: String, required: true },
+    phone: { type: String, required: true },
+    addressLine: { type: String, required: true },
+    city: { type: String, required: true },
+    district: { type: String, required: true },
+    country: { type: String, required: true },
+    zipCode: { type: String },
   },
-  isDefault: {
-    type: Boolean,
-    default: false,
-  },
-});
+  { _id: false, versionKey: false },
+);
 
 export const AuthProviderSchema = new Schema<IAuthProvider>(
   {
@@ -58,7 +60,8 @@ const UserSchema = new Schema<IUser>(
       type: Boolean,
       default: true,
     },
-    addresses: [AddressSchema],
+    billingAddress: { type: AddressSchema },
+    shippingAddress: { type: AddressSchema },
     auths: [AuthProviderSchema],
   },
   {
