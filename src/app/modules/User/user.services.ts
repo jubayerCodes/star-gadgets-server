@@ -56,8 +56,23 @@ const getProfile = async (email: string) => {
   return user;
 };
 
+const updateProfile = async (email: string, payload: Partial<IUser>) => {
+  const user = await User.findOneAndUpdate(
+    { email },
+    { $set: payload },
+    { new: true, runValidators: true },
+  ).select("-password");
+
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found");
+  }
+
+  return user;
+};
+
 export const UserServices = {
   createUser,
   getAllUsers,
   getProfile,
+  updateProfile,
 };

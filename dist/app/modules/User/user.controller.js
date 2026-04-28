@@ -58,8 +58,19 @@ const getProfile = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(vo
         success: true,
     });
 }));
+const updateProfile = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = (0, getUserFromReq_1.getUserFromReq)(req);
+    const updatedUser = yield user_services_1.UserServices.updateProfile(user.email, req.body);
+    (0, sendResponse_1.sendResponse)(res, {
+        statusCode: http_status_codes_1.default.OK,
+        data: updatedUser,
+        message: "Profile updated successfully",
+        success: true,
+    });
+}));
 exports.UserControllers = {
     createUser,
     getAllUsers,
     getProfile,
+    updateProfile,
 };

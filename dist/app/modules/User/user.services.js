@@ -63,8 +63,16 @@ const getProfile = (email) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield user_model_1.User.findOne({ email }).select("-password");
     return user;
 });
+const updateProfile = (email, payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield user_model_1.User.findOneAndUpdate({ email }, { $set: payload }, { new: true, runValidators: true }).select("-password");
+    if (!user) {
+        throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "User not found");
+    }
+    return user;
+});
 exports.UserServices = {
     createUser,
     getAllUsers,
     getProfile,
+    updateProfile,
 };
