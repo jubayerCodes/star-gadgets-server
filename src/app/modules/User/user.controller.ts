@@ -57,8 +57,22 @@ const getProfile = catchAsync(async (req: Request, res: Response, next: NextFunc
   });
 });
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const updateProfile = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const user = getUserFromReq(req);
+  const updatedUser = await UserServices.updateProfile(user.email, req.body);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    data: updatedUser,
+    message: "Profile updated successfully",
+    success: true,
+  });
+});
+
 export const UserControllers = {
   createUser,
   getAllUsers,
   getProfile,
+  updateProfile,
 };

@@ -4,9 +4,14 @@ export enum Role {
   SUPER_ADMIN = "SUPER_ADMIN",
 }
 
-export interface IUserAddress {
-  address: string;
-  isDefault: boolean;
+export interface IAddress {
+  fullName: string;
+  phone: string;
+  addressLine: string;
+  city: string;
+  district: string;
+  country: string;
+  zipCode?: string;
 }
 
 export enum Provider {
@@ -18,6 +23,7 @@ export interface IAuthProvider {
   provider: Provider;
   providerId: string;
 }
+
 export interface IUser {
   name: string;
   email: string;
@@ -27,6 +33,7 @@ export interface IUser {
   isVerified: boolean;
   phone: string;
   role: Role;
-  addresses?: IUserAddress[];
+  billingAddress?: IAddress;
+  shippingAddress?: IAddress;
   auths: IAuthProvider[];
 }

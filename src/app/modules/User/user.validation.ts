@@ -2,6 +2,16 @@ import z from "zod";
 import { Role } from "./user.interface";
 import { PhoneNumberSchema } from "../../validations";
 
+const addressSchema = z.object({
+  fullName: z.string({ error: "Full name must be a string" }).min(2, { message: "Full name must be at least 2 characters." }),
+  phone: PhoneNumberSchema,
+  addressLine: z.string({ error: "Address line must be a string" }).min(3, { message: "Address line is required." }),
+  city: z.string({ error: "City must be a string" }).min(1, { message: "City is required." }),
+  district: z.string({ error: "District must be a string" }).min(1, { message: "District is required." }),
+  country: z.string({ error: "Country must be a string" }).min(1, { message: "Country is required." }),
+  zipCode: z.string().optional(),
+});
+
 export const createUserZodSchema = z.object({
   name: z
     .string({ error: "Name must be string" })
@@ -24,14 +34,6 @@ export const createUserZodSchema = z.object({
       message: "Password must contain at least 1 number.",
     }),
   phone: PhoneNumberSchema,
-  addresses: z
-    .array(
-      z.object({
-        address: z.string({ error: "Address must be string" }),
-        isDefault: z.boolean({ error: "isDefault must be true or false" }).optional(),
-      }),
-    )
-    .optional(),
 });
 
 export const updateUserZodSchema = z.object({
@@ -43,12 +45,6 @@ export const updateUserZodSchema = z.object({
   role: z.enum(Object.values(Role) as [string]).optional(),
   isDeleted: z.boolean({ error: "isDeleted must be true or false" }).optional(),
   phone: PhoneNumberSchema.optional(),
-  addresses: z
-    .array(
-      z.object({
-        address: z.string({ error: "Address must be string" }),
-        isDefault: z.boolean({ error: "isDefault must be true or false" }).optional(),
-      }),
-    )
-    .optional(),
+  billingAddress: addressSchema.optional(),
+  shippingAddress: addressSchema.optional(),
 });
