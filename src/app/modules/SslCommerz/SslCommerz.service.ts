@@ -14,6 +14,7 @@ const sslPaymentInit = async (payload: ISslCommerzInit) => {
       store_passwd: envVars.SSL.SSL_STORE_PASS,
       total_amount: payload.amount,
       currency: "BDT",
+      ipn_url: `${envVars.SSL.SSL_IPN_URL}`,
       tran_id: payload.transactionId,
       product_category: "Gadgets",
       product_name: "Star Gadgets",

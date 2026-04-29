@@ -46,7 +46,6 @@ const getPaymentByTransactionId = catchAsync(async (req: Request, res: Response,
   });
 });
 
-
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getAllPayments = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const { payments, meta } = await PaymentServices.getAllPayments(req.query as Record<string, string>);
@@ -112,7 +111,6 @@ const paymentCancel = catchAsync(async (req: Request, res: Response, next: NextF
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const initiatePayment = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-
   const user = getUserFromReq(req);
   const result = await PaymentServices.initiatePayment(req.params.orderId as string, user.email);
 
@@ -124,6 +122,53 @@ const initiatePayment = catchAsync(async (req: Request, res: Response, next: Nex
   });
 });
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const validatePayment = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const notification = req.body;
+
+  await PaymentServices.validatePayment(notification);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Payment validated successfully",
+    data: {},
+  });
+});
+
+// {
+//   amount: '1049.00',
+//   bank_tran_id: '260429114348QUuPusz3Zr6RSLR',
+//   base_fair: '0.00',
+//   card_brand: 'MOBILEBANKING',
+//   card_issuer: 'BKash Mobile Banking',
+//   card_issuer_country: 'Bangladesh',
+//   card_issuer_country_code: 'BD',
+//   card_no: '',
+//   card_sub_brand: 'Classic',
+//   card_type: 'BKASH-BKash',
+//   currency: 'BDT',
+//   currency_amount: '1049.00',
+//   currency_rate: '1.0000',
+//   currency_type: 'BDT',
+//   error: '',
+//   risk_level: '0',
+//   risk_title: 'Safe',
+//   status: 'VALID',
+//   store_amount: '1022.78',
+//   store_id: 'jubay69ed82cf07c84',
+//   tran_date: '2026-04-29 11:43:41',
+//   tran_id: 'tran_1777441419621_408395',
+//   val_id: '260429114348ADDiNMNPJqBALuG',
+//   value_a: '',
+//   value_b: '',
+//   value_c: '',
+//   value_d: '',
+//   verify_sign: '542e96fc645841a96aecb1cbe0b2ea13',
+//   verify_sign_sha2: 'b1b895e3958763a0a785e1e62fb436e27ddf77036a113d654c7b24151f29412e',
+//   verify_key: 'amount,bank_tran_id,base_fair,card_brand,card_issuer,card_issuer_country,card_issuer_country_code,card_no,card_sub_brand,card_type,currency,currency_amount,currency_rate,currency_type,error,risk_level,risk_title,status,store_amount,store_id,tran_date,tran_id,val_id,value_a,value_b,value_c,value_d'
+// }
+
 export const PaymentController = {
   getPaymentByOrderId,
   getPaymentByTransactionId,
@@ -134,4 +179,5 @@ export const PaymentController = {
   paymentFail,
   paymentCancel,
   initiatePayment,
+  validatePayment,
 };

@@ -30,6 +30,8 @@ PaymentRoutes.post(
   PaymentController.initiatePayment,
 );
 
+PaymentRoutes.post("/validate", PaymentController.validatePayment);
+
 // Update payment status (admin only)
 PaymentRoutes.patch(
   "/:id/status",
