@@ -223,7 +223,6 @@ const initiatePayment = (orderId, userEmail) => __awaiter(void 0, void 0, void 0
 });
 const validatePayment = (notification) => __awaiter(void 0, void 0, void 0, function* () {
     const { tran_id, val_id, status, currency, amount } = notification;
-    console.log("noti:", notification);
     if (!status || status === "FAILED" || status === "CANCELLED") {
         throw new AppError_1.default(http_status_codes_1.default.BAD_REQUEST, "Invalid payment");
     }
@@ -242,7 +241,6 @@ const validatePayment = (notification) => __awaiter(void 0, void 0, void 0, func
             method: "GET",
             url: `${env_1.envVars.SSL.SSL_VALIDATION_API}?val_id=${val_id}&store_id=${env_1.envVars.SSL.SSL_STORE_ID}&store_passwd=${env_1.envVars.SSL.SSL_STORE_PASS}`,
         });
-        console.log("valiidation:", result.data);
         if (result.data.status === "VALID" || result.data.status === "VALIDATED") {
             yield payment_model_1.Payment.findOneAndUpdate({ transactionId: tran_id }, {
                 paymentGatewayData: result.data,
