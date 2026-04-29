@@ -17,4 +17,5 @@ exports.PaymentRoutes.post("/success", payment_controller_1.PaymentController.pa
 exports.PaymentRoutes.post("/fail", payment_controller_1.PaymentController.paymentFail);
 exports.PaymentRoutes.post("/cancel", payment_controller_1.PaymentController.paymentCancel);
 exports.PaymentRoutes.post("/initiate/:orderId", (0, checkAuth_1.checkAuth)(user_interface_1.Role.USER, user_interface_1.Role.ADMIN, user_interface_1.Role.SUPER_ADMIN), payment_controller_1.PaymentController.initiatePayment);
+exports.PaymentRoutes.post("/validate", payment_controller_1.PaymentController.validatePayment);
 exports.PaymentRoutes.patch("/:id/status", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN, user_interface_1.Role.SUPER_ADMIN), (0, validateRequest_1.validateRequest)(payment_validation_1.updatePaymentStatusValidation), payment_controller_1.PaymentController.updatePaymentStatus);

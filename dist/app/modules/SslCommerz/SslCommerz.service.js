@@ -26,6 +26,7 @@ const sslPaymentInit = (payload) => __awaiter(void 0, void 0, void 0, function* 
             store_passwd: env_1.envVars.SSL.SSL_STORE_PASS,
             total_amount: payload.amount,
             currency: "BDT",
+            ipn_url: `${env_1.envVars.SSL.SSL_IPN_URL}`,
             tran_id: payload.transactionId,
             product_category: "Gadgets",
             product_name: "Star Gadgets",
