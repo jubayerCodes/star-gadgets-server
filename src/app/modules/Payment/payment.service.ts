@@ -248,7 +248,7 @@ const initiatePayment = async (orderId: string, userEmail: string) => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const validatePayment = async (notification: any) => {
   const { tran_id, val_id, status, currency, amount } = notification;
-  console.log("noti:", notification);
+
   if (!status || status === "FAILED" || status === "CANCELLED") {
     throw new AppError(httpStatus.BAD_REQUEST, "Invalid payment");
   }
@@ -272,7 +272,7 @@ const validatePayment = async (notification: any) => {
       method: "GET",
       url: `${envVars.SSL.SSL_VALIDATION_API}?val_id=${val_id}&store_id=${envVars.SSL.SSL_STORE_ID}&store_passwd=${envVars.SSL.SSL_STORE_PASS}`,
     });
-    console.log("valiidation:", result.data);
+
     if (result.data.status === "VALID" || result.data.status === "VALIDATED") {
       await Payment.findOneAndUpdate(
         { transactionId: tran_id },
