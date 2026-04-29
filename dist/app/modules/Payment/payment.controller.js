@@ -93,6 +93,16 @@ const initiatePayment = (0, catchAsync_1.catchAsync)((req, res, next) => __await
         data: result,
     });
 }));
+const validatePayment = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const notification = req.body;
+    yield payment_service_1.PaymentServices.validatePayment(notification);
+    (0, sendResponse_1.sendResponse)(res, {
+        statusCode: 200,
+        success: true,
+        message: "Payment validated successfully",
+        data: {},
+    });
+}));
 exports.PaymentController = {
     getPaymentByOrderId,
     getPaymentByTransactionId,
@@ -103,4 +113,5 @@ exports.PaymentController = {
     paymentFail,
     paymentCancel,
     initiatePayment,
+    validatePayment,
 };

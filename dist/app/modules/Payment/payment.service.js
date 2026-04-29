@@ -57,6 +57,8 @@ const user_model_1 = require("../User/user.model");
 const user_interface_1 = require("../User/user.interface");
 const order_interface_1 = require("../Order/order.interface");
 const SslCommerz_service_1 = require("../SslCommerz/SslCommerz.service");
+const env_1 = require("../../config/env");
+const axios_1 = __importDefault(require("axios"));
 const createPayment = (orderId, amount, paymentMethod, transactionId, session) => __awaiter(void 0, void 0, void 0, function* () {
     const [payment] = yield payment_model_1.Payment.create([
         {
@@ -219,6 +221,53 @@ const initiatePayment = (orderId, userEmail) => __awaiter(void 0, void 0, void 0
     });
     return { GatewayPageURL: paymentResponse.GatewayPageURL };
 });
+const validatePayment = (notification) => __awaiter(void 0, void 0, void 0, function* () {
+    const { tran_id, val_id, status, currency, amount } = notification;
+    console.log("noti:", notification);
+    if (!status || status === "FAILED" || status === "CANCELLED") {
+        throw new AppError_1.default(http_status_codes_1.default.BAD_REQUEST, "Invalid payment");
+    }
+    if (currency !== "BDT") {
+        throw new AppError_1.default(http_status_codes_1.default.BAD_REQUEST, "Invalid currency");
+    }
+    const payment = yield payment_model_1.Payment.findOne({ transactionId: tran_id });
+    if (!payment) {
+        throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "Payment not found");
+    }
+    if (payment.amount !== Number(amount)) {
+        throw new AppError_1.default(http_status_codes_1.default.BAD_REQUEST, "Invalid amount");
+    }
+    try {
+        const result = yield (0, axios_1.default)({
+            method: "GET",
+            url: `${env_1.envVars.SSL.SSL_VALIDATION_API}?val_id=${val_id}&store_id=${env_1.envVars.SSL.SSL_STORE_ID}&store_passwd=${env_1.envVars.SSL.SSL_STORE_PASS}`,
+        });
+        console.log("valiidation:", result.data);
+        if (result.data.status === "VALID" || result.data.status === "VALIDATED") {
+            yield payment_model_1.Payment.findOneAndUpdate({ transactionId: tran_id }, {
+                paymentGatewayData: result.data,
+            }, { runValidators: true });
+        }
+        else if (result.data.status === "FAILED" ||
+            result.data.status === "CANCELLED" ||
+            result.data.status === "INVALID_TRANSACTION") {
+            yield payment_model_1.Payment.findOneAndUpdate({ transactionId: tran_id }, {
+                status: payment_interface_1.PaymentStatus.FAILED,
+                paymentGatewayData: result.data,
+            }, { runValidators: true });
+            throw new AppError_1.default(http_status_codes_1.default.BAD_REQUEST, "Payment validation failed");
+        }
+        else {
+            throw new AppError_1.default(http_status_codes_1.default.BAD_REQUEST, `Unexpected validation status: ${result.data.status}`);
+        }
+    }
+    catch (error) {
+        if (error instanceof AppError_1.default)
+            throw error;
+        throw new AppError_1.default(http_status_codes_1.default.INTERNAL_SERVER_ERROR, "Payment validation failed");
+    }
+    return { success: true };
+});
 exports.PaymentServices = {
     createPayment,
     getPaymentByOrderId,
@@ -230,4 +279,5 @@ exports.PaymentServices = {
     paymentFail,
     paymentCancel,
     initiatePayment,
+    validatePayment,
 };

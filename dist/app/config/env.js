@@ -31,6 +31,7 @@ const loadEnvVariables = () => {
         "SSL_SUCCESS_FRONTEND_URL",
         "SSL_FAIL_FRONTEND_URL",
         "SSL_CANCEL_FRONTEND_URL",
+        "SSL_IPN_URL",
     ];
     reqEnvVariables.forEach((envVar) => {
         if (!process.env[envVar]) {
@@ -64,6 +65,7 @@ const loadEnvVariables = () => {
             SSL_SUCCESS_FRONTEND_URL: process.env.SSL_SUCCESS_FRONTEND_URL,
             SSL_FAIL_FRONTEND_URL: process.env.SSL_FAIL_FRONTEND_URL,
             SSL_CANCEL_FRONTEND_URL: process.env.SSL_CANCEL_FRONTEND_URL,
+            SSL_IPN_URL: process.env.SSL_IPN_URL,
         },
     };
 };
