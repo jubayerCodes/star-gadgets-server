@@ -10,6 +10,8 @@ import { User } from "../User/user.model";
 import { Role } from "../User/user.interface";
 import { OrderStatus } from "../Order/order.interface";
 import { SslCommerzService } from "../SslCommerz/SslCommerz.service";
+import { envVars } from "../../config/env";
+import axios from "axios";
 
 const createPayment = async (
   orderId: Types.ObjectId,
@@ -243,6 +245,67 @@ const initiatePayment = async (orderId: string, userEmail: string) => {
   return { GatewayPageURL: paymentResponse.GatewayPageURL };
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const validatePayment = async (notification: any) => {
+  const { tran_id, val_id, status, currency, amount } = notification;
+
+  if (!status || status === "FAILED" || status === "CANCELLED") {
+    throw new AppError(httpStatus.BAD_REQUEST, "Invalid payment");
+  }
+
+  if (currency !== "BDT") {
+    throw new AppError(httpStatus.BAD_REQUEST, "Invalid currency");
+  }
+
+  const payment = await Payment.findOne({ transactionId: tran_id });
+
+  if (!payment) {
+    throw new AppError(httpStatus.NOT_FOUND, "Payment not found");
+  }
+
+  if (payment.amount !== Number(amount)) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Invalid amount");
+  }
+
+  try {
+    const result = await axios({
+      method: "GET",
+      url: `${envVars.SSL.SSL_VALIDATION_API}?val_id=${val_id}&store_id=${envVars.SSL.SSL_STORE_ID}&store_passwd=${envVars.SSL.SSL_STORE_PASS}`,
+    });
+
+    if (result.data.status === "VALID" || result.data.status === "VALIDATED") {
+      await Payment.findOneAndUpdate(
+        { transactionId: tran_id },
+        {
+          paymentGatewayData: result.data,
+        },
+        { runValidators: true },
+      );
+    } else if (
+      result.data.status === "FAILED" ||
+      result.data.status === "CANCELLED" ||
+      result.data.status === "INVALID_TRANSACTION"
+    ) {
+      await Payment.findOneAndUpdate(
+        { transactionId: tran_id },
+        {
+          status: PaymentStatus.FAILED,
+          paymentGatewayData: result.data,
+        },
+        { runValidators: true },
+      );
+      throw new AppError(httpStatus.BAD_REQUEST, "Payment validation failed");
+    } else {
+      throw new AppError(httpStatus.BAD_REQUEST, `Unexpected validation status: ${result.data.status}`);
+    }
+  } catch (error) {
+    if (error instanceof AppError) throw error;
+    throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, "Payment validation failed");
+  }
+
+  return { success: true };
+};
+
 export const PaymentServices = {
   createPayment,
   getPaymentByOrderId,
@@ -254,4 +317,5 @@ export const PaymentServices = {
   paymentFail,
   paymentCancel,
   initiatePayment,
+  validatePayment,
 };

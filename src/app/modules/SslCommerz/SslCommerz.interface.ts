@@ -9,6 +9,7 @@ export interface ISslCommerzRequest {
   success_url: string;
   fail_url: string;
   cancel_url: string;
+  ipn_url: string;
   cus_name: string;
   cus_email: string;
   cus_add1: string;
