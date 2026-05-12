@@ -35,7 +35,7 @@ export const createUserZodSchema = z.object({
     .regex(/^(?=.*\d)/, {
       message: "Password must contain at least 1 number.",
     }),
-  phone: PhoneNumberSchema,
+  phone: PhoneNumberSchema.optional(),
 });
 
 export const updateUserZodSchema = z.object({

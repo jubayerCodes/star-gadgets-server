@@ -31,6 +31,11 @@ interface EnvConfig {
     SSL_CANCEL_FRONTEND_URL: string;
     SSL_IPN_URL: string;
   };
+  GOOGLE_CREDENTIALS: {
+    GOOGLE_CLIENT_ID: string;
+    GOOGLE_CLIENT_SECRET: string;
+    GOOGLE_CALLBACK_URL: string;
+  };
 }
 
 const loadEnvVariables = (): EnvConfig => {
@@ -59,6 +64,9 @@ const loadEnvVariables = (): EnvConfig => {
     "SSL_FAIL_FRONTEND_URL",
     "SSL_CANCEL_FRONTEND_URL",
     "SSL_IPN_URL",
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
+    "GOOGLE_CALLBACK_URL",
   ];
 
   reqEnvVariables.forEach((envVar) => {
@@ -95,6 +103,11 @@ const loadEnvVariables = (): EnvConfig => {
       SSL_FAIL_FRONTEND_URL: process.env.SSL_FAIL_FRONTEND_URL as string,
       SSL_CANCEL_FRONTEND_URL: process.env.SSL_CANCEL_FRONTEND_URL as string,
       SSL_IPN_URL: process.env.SSL_IPN_URL as string,
+    },
+    GOOGLE_CREDENTIALS: {
+      GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID as string,
+      GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET as string,
+      GOOGLE_CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL as string,
     },
   };
 };

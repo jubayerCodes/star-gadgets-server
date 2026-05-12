@@ -21,6 +21,8 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/passport": "^1.0.17",
+    "@types/passport-google-oauth20": "^2.0.17",
     "@types/pdfkit": "^0.17.6",
     "eslint": "^9.39.2",
     "prettier": "^3.8.1",
@@ -42,6 +44,8 @@
     "mongoose": "^9.2.1",
     "multer": "^2.0.2",
     "multer-storage-cloudinary": "^4.0.0",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
     "pdfkit": "^0.18.0",
     "zod": "^4.3.5"
   }

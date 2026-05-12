@@ -49,8 +49,8 @@ const UserSchema = new Schema<IUser>(
     },
     phone: {
       type: String,
-      required: true,
       unique: true,
+      sparse: true,
     },
     isDeleted: {
       type: Boolean,

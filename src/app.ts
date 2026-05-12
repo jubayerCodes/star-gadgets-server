@@ -1,3 +1,4 @@
+import "./app/config/passport";
 import express, { Request, Response } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -5,10 +6,12 @@ import { router } from "./app/routes";
 import { globalErrorHandler } from "./app/middlewares/globalErrorHandler";
 import notfound from "./app/middlewares/notFound";
 import { envVars } from "./app/config/env";
+import passport from "passport";
 
 const app = express();
 
 app.use(cookieParser());
+app.use(passport.initialize());
 
 app.use(
   cors({

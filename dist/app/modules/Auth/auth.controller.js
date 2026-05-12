@@ -20,6 +20,7 @@ const catchAsync_1 = require("../../utils/catchAsync");
 const sendResponse_1 = require("../../utils/sendResponse");
 const setCookie_1 = require("../../utils/setCookie");
 const getUserFromReq_1 = require("../../utils/getUserFromReq");
+const userTokens_1 = require("../../utils/userTokens");
 const credentialsLogin = (0, catchAsync_1.catchAsync)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     const loginInfo = yield auth_services_1.AuthServices.credentialsLogin(req.body);
     (0, setCookie_1.setAuthCookie)(res, loginInfo);
@@ -72,9 +73,16 @@ const resetPassword = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter
         data: null,
     });
 }));
+const googleCallback = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = req.user;
+    const token = (0, userTokens_1.createUserTokens)(user);
+    (0, setCookie_1.setAuthCookie)(res, token);
+    res.redirect(`${process.env.CLIENT_URL}/account`);
+}));
 exports.AuthControllers = {
     credentialsLogin,
     getNewAccessToken,
     logout,
     resetPassword,
+    googleCallback,
 };
