@@ -60,6 +60,7 @@ const payment_model_1 = require("../Payment/payment.model");
 const extractSearchQuery_1 = require("../../utils/extractSearchQuery");
 const mongoose_1 = __importStar(require("mongoose"));
 const SslCommerz_service_1 = require("../SslCommerz/SslCommerz.service");
+const getSearchQuery_1 = require("../../utils/getSearchQuery");
 const resolveUserIdFromEmail = (email) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield user_model_1.User.findOne({ email }).select("_id");
     return user === null || user === void 0 ? void 0 : user._id;
@@ -181,19 +182,53 @@ const createOrder = (payload, userEmail) => __awaiter(void 0, void 0, void 0, fu
     };
 });
 const getAllOrders = (query) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
-    const { page, skip, limit } = (0, extractSearchQuery_1.extractSearchQuery)(query);
-    const { status } = query;
-    const matchStage = {};
+    var _a, _b, _c;
+    const { page, skip, limit, search, sortBy, sortOrder } = (0, extractSearchQuery_1.extractSearchQuery)(query);
+    const { minTotal, maxTotal, status, paymentStatus, paymentMethod } = query;
+    const searchQuery = (0, getSearchQuery_1.getSearchQuery)(search, [
+        "billingDetails.firstName",
+        "billingDetails.firstName",
+        "billingDetails.email",
+        "orderNumber",
+    ]);
+    const matchStage = Object.assign({}, searchQuery);
     if (status)
         matchStage.orderStatus = status;
-    const pipeline = [{ $match: matchStage }, { $sort: { createdAt: -1 } }];
+    const sortDirection = sortOrder === "asc" ? 1 : -1;
+    const sortableFields = {
+        items: { itemsCount: sortDirection },
+        createdAt: { createdAt: sortDirection },
+        updatedAt: { updatedAt: sortDirection },
+        total: { total: sortDirection },
+    };
+    const sortStage = (_a = sortableFields[sortBy]) !== null && _a !== void 0 ? _a : { createdAt: -1 };
+    const refMatchStage = {};
+    if (paymentMethod)
+        refMatchStage["paymentId.paymentMethod"] = paymentMethod;
+    if (paymentStatus)
+        refMatchStage["paymentId.status"] = paymentStatus;
+    const totalConditions = {};
+    if (minTotal && maxTotal) {
+        totalConditions.total = {
+            $gte: Number(minTotal),
+            $lte: Number(maxTotal),
+        };
+    }
+    const pipeline = [
+        { $match: matchStage },
+        ...(Object.keys(totalConditions).length > 0 ? [{ $match: totalConditions }] : []),
+        { $lookup: { from: "payments", localField: "paymentId", foreignField: "_id", as: "paymentId" } },
+        { $unwind: { path: "$paymentId", preserveNullAndEmptyArrays: false } },
+        ...(Object.keys(refMatchStage).length > 0 ? [{ $match: refMatchStage }] : []),
+        { $addFields: { itemsCount: { $size: { $ifNull: ["$items", []] } } } },
+        { $sort: sortStage },
+        { $project: { itemsCount: 0 } },
+    ];
     const countResult = yield order_model_1.Order.aggregate([...pipeline, { $count: "total" }]);
-    const total = (_b = (_a = countResult[0]) === null || _a === void 0 ? void 0 : _a.total) !== null && _b !== void 0 ? _b : 0;
+    const total = (_c = (_b = countResult[0]) === null || _b === void 0 ? void 0 : _b.total) !== null && _c !== void 0 ? _c : 0;
     const orders = yield order_model_1.Order.aggregate([...pipeline, { $skip: skip }, { $limit: limit }]);
-    const populated = yield order_model_1.Order.populate(orders, { path: "paymentId" });
     const meta = { page, limit, skip, total };
-    return { orders: populated, meta };
+    return { orders: orders, meta };
 });
 const getMyOrders = (userEmail, query) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;

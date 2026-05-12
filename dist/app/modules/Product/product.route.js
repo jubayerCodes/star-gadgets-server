@@ -10,7 +10,7 @@ const user_interface_1 = require("../User/user.interface");
 exports.ProductRoutes = (0, express_1.Router)();
 exports.ProductRoutes.post("/", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN), (0, validateRequest_1.validateRequest)(product_validation_1.createProductZodSchema), product_controller_1.ProductControllers.createProduct);
 exports.ProductRoutes.patch("/:id", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN), (0, validateRequest_1.validateRequest)(product_validation_1.updateProductZodSchema), product_controller_1.ProductControllers.updateProduct);
-exports.ProductRoutes.get("/admin", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN), product_controller_1.ProductControllers.getProductsAdmin);
+exports.ProductRoutes.get("/admin", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN, user_interface_1.Role.SUPER_ADMIN), product_controller_1.ProductControllers.getProductsAdmin);
 exports.ProductRoutes.get("/featured", product_controller_1.ProductControllers.getFeaturedProducts);
 exports.ProductRoutes.get("/search/filters", product_controller_1.ProductControllers.getSearchFilters);
 exports.ProductRoutes.get("/search", product_controller_1.ProductControllers.searchProducts);
