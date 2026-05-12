@@ -21,7 +21,7 @@ ProductRoutes.patch(
   ProductControllers.updateProduct,
 );
 
-ProductRoutes.get("/admin", checkAuth(Role.ADMIN), ProductControllers.getProductsAdmin);
+ProductRoutes.get("/admin", checkAuth(Role.ADMIN, Role.SUPER_ADMIN), ProductControllers.getProductsAdmin);
 
 ProductRoutes.get("/featured", ProductControllers.getFeaturedProducts);
 

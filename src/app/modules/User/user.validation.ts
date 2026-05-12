@@ -3,7 +3,9 @@ import { Role } from "./user.interface";
 import { PhoneNumberSchema } from "../../validations";
 
 const addressSchema = z.object({
-  fullName: z.string({ error: "Full name must be a string" }).min(2, { message: "Full name must be at least 2 characters." }),
+  fullName: z
+    .string({ error: "Full name must be a string" })
+    .min(2, { message: "Full name must be at least 2 characters." }),
   phone: PhoneNumberSchema,
   addressLine: z.string({ error: "Address line must be a string" }).min(3, { message: "Address line is required." }),
   city: z.string({ error: "City must be a string" }).min(1, { message: "City is required." }),

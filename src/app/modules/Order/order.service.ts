@@ -13,6 +13,7 @@ import { extractSearchQuery } from "../../utils/extractSearchQuery";
 import { IMeta } from "../../utils/sendResponse";
 import mongoose, { Types } from "mongoose";
 import { SslCommerzService } from "../SslCommerz/SslCommerz.service";
+import { getSearchQuery } from "../../utils/getSearchQuery";
 
 interface CreateOrderPayload {
   billingDetails: IBillingDetails;
@@ -217,23 +218,60 @@ const createOrder = async (payload: CreateOrderPayload, userEmail?: string) => {
 };
 
 const getAllOrders = async (query: Record<string, string>) => {
-  const { page, skip, limit } = extractSearchQuery(query);
-  const { status } = query;
+  const { page, skip, limit, search, sortBy, sortOrder } = extractSearchQuery(query);
+  const { minTotal, maxTotal, status, paymentStatus, paymentMethod } = query;
 
-  const matchStage: Record<string, unknown> = {};
+  const searchQuery = getSearchQuery(search, [
+    "billingDetails.firstName",
+    "billingDetails.firstName",
+    "billingDetails.email",
+    "orderNumber",
+  ]);
+
+  const matchStage: Record<string, unknown> = { ...searchQuery };
+
   if (status) matchStage.orderStatus = status;
 
-  const pipeline = [{ $match: matchStage }, { $sort: { createdAt: -1 as const } }];
+  const sortDirection = sortOrder === "asc" ? 1 : -1;
+  const sortableFields: Record<string, unknown> = {
+    items: { itemsCount: sortDirection },
+    createdAt: { createdAt: sortDirection },
+    updatedAt: { updatedAt: sortDirection },
+    total: { total: sortDirection },
+  };
+  const sortStage = sortableFields[sortBy] ?? { createdAt: -1 };
+
+  const refMatchStage: Record<string, unknown> = {};
+
+  if (paymentMethod) refMatchStage["paymentId.paymentMethod"] = paymentMethod;
+  if (paymentStatus) refMatchStage["paymentId.status"] = paymentStatus;
+
+  const totalConditions: Record<string, unknown> = {};
+  if (minTotal && maxTotal) {
+    totalConditions.total = {
+      $gte: Number(minTotal),
+      $lte: Number(maxTotal),
+    };
+  }
+
+  const pipeline = [
+    { $match: matchStage },
+    ...(Object.keys(totalConditions).length > 0 ? [{ $match: totalConditions }] : []),
+    { $lookup: { from: "payments", localField: "paymentId", foreignField: "_id", as: "paymentId" } },
+    { $unwind: { path: "$paymentId", preserveNullAndEmptyArrays: false } },
+    ...(Object.keys(refMatchStage).length > 0 ? [{ $match: refMatchStage }] : []),
+    { $addFields: { itemsCount: { $size: { $ifNull: ["$items", []] } } } },
+    { $sort: sortStage as Record<string, 1 | -1> },
+    { $project: { itemsCount: 0 } },
+  ];
 
   const countResult = await Order.aggregate([...pipeline, { $count: "total" }]);
   const total = countResult[0]?.total ?? 0;
 
   const orders = await Order.aggregate([...pipeline, { $skip: skip }, { $limit: limit }]);
-
-  const populated = await Order.populate(orders, { path: "paymentId" });
-
   const meta: IMeta = { page, limit, skip, total };
-  return { orders: populated, meta };
+
+  return { orders: orders, meta };
 };
 
 const getMyOrders = async (userEmail: string, query: Record<string, string>) => {
