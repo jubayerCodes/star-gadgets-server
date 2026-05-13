@@ -7,6 +7,8 @@ import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { setAuthCookie } from "../../utils/setCookie";
 import { getUserFromReq } from "../../utils/getUserFromReq";
+import { createUserTokens } from "../../utils/userTokens";
+import { IUser } from "../User/user.interface";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const credentialsLogin = catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
@@ -77,9 +79,21 @@ const resetPassword = catchAsync(async (req: Request, res: Response, next: NextF
   });
 });
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const googleCallback = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const user = req.user as IUser;
+
+  const token = createUserTokens(user);
+
+  setAuthCookie(res, token);
+
+  res.redirect(`${process.env.CLIENT_URL}/account`);
+});
+
 export const AuthControllers = {
   credentialsLogin,
   getNewAccessToken,
   logout,
   resetPassword,
+  googleCallback,
 };
