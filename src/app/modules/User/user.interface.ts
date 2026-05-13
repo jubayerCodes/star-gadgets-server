@@ -31,7 +31,7 @@ export interface IUser {
   avatar?: string;
   isDeleted: boolean;
   isVerified: boolean;
-  phone: string;
+  phone?: string;
   role: Role;
   billingAddress?: IAddress;
   shippingAddress?: IAddress;
