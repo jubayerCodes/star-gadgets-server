@@ -59,8 +59,10 @@ passport.use(
         });
 
         return done(null, user);
-      } catch (err) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (err: any) {
         return done(err, false);
+        // return new AppError(httpStatus.BAD_REQUEST, err.message || "Authentication failed");
       }
     },
   ),
